@@ -1,4 +1,4 @@
-import InstallPWA from "@/components/InstallButton";
+import PWAFeatures from "@/components/PWAFeatures";
 import Image from "next/image";
 
 export default function Home() {
@@ -13,7 +13,7 @@ export default function Home() {
           height={38}
           priority
         />
-       <InstallPWA />
+       <PWAFeatures />
 
        
       </main>
