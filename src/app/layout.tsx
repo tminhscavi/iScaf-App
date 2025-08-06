@@ -28,13 +28,16 @@ export const metadata: Metadata = {
   icons: {
     icon: [
       { url: '/favicon.ico' },
-      { url: '/icons/icon-192x192.png', sizes: '192x192', type: 'image/png' },
+      { url: '/icons/icon-48x48.png', sizes: '48x48', type: 'image/png' },
+      { url: '/icons/icon-72x72.png', sizes: '72x72', type: 'image/png' },
+      { url: '/icons/icon-96x96.png', sizes: '96x96', type: 'image/png' },
     ],
     apple: [
-      { url: '/icons/icon-192x192.png' },
+      {
+        url: '/icons/icon-48x48.png',
+      },
     ],
   },
-
 };
 
 export default function RootLayout({

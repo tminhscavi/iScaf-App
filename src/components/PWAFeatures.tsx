@@ -13,7 +13,6 @@ export default function PWAFeatures() {
     updateServiceWorker,
     requestNotificationPermission,
     showNotification,
-    offlineFetch,
     clearCache
   } = useNextPWA()
 
@@ -26,15 +25,6 @@ export default function PWAFeatures() {
       })
     } catch (error) {
       console.error('Notification error:', error)
-    }
-  }
-
-  const handleOfflineRequest = async () => {
-    try {
-      const response = await offlineFetch('/api/data')
-      console.log('Response:', await response.json())
-    } catch (error) {
-      console.log('Request queued for when online')
     }
   }
 
@@ -57,13 +47,6 @@ export default function PWAFeatures() {
         className="bg-green-500 text-white px-4 py-2 rounded"
       >
         Test Notification
-      </button>
-      
-      <button 
-        onClick={handleOfflineRequest}
-        className="bg-purple-500 text-white px-4 py-2 rounded"
-      >
-        Make Offline Request
       </button>
       
       <button 

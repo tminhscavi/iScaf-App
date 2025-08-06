@@ -57,8 +57,8 @@ self.addEventListener('push', (event) => {
   const title = data.title || 'New Notification'
   const options = {
     body: data.body || 'You have a new message',
-    icon: data.icon || '/icon-192x192.png',
-    badge: '/icon-192x192.png',
+    icon: data.icon || '/icon-48x48.png',
+    badge: '/icon-48x48.png',
     vibrate: [100, 50, 100],
     data: {
       url: data.url || '/',
@@ -68,7 +68,7 @@ self.addEventListener('push', (event) => {
       {
         action: 'open',
         title: 'Open',
-        icon: '/icon-192x192.png'
+        icon: '/icon-48x48.png'
       },
       {
         action: 'close',

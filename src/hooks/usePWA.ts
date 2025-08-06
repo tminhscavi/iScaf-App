@@ -129,8 +129,8 @@ export function useNextPWA() {
     }
 
     return state.registration.showNotification(title, {
-      icon: '/icon-192x192.png',
-      badge: '/icon-192x192.png',
+      icon: '/icon-48x48.png',
+      badge: '/icon-48x48.png',
       ...options
     })
   }, [state.registration, state.notificationPermission])
