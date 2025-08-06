@@ -14,7 +14,10 @@ const withPWA = PWA({
   reloadOnOnline: true,
 
   // Exclude files from precache manifest
-  buildExcludes: [/middleware-manifest\.json$/],
+  buildExcludes: [
+    /middleware-manifest\.json$/,
+    /app-build-manifest\.json$/, // 👈 Add this if needed
+  ],
 
   // Set Workbox mode
   mode: 'production', // Can be set to 'development' to disable precache
@@ -38,7 +41,6 @@ const withPWA = PWA({
 
 const nextConfig = {
   reactStrictMode: true,
-
 };
 
 export default withPWA(nextConfig);
