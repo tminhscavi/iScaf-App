@@ -9,7 +9,7 @@ export interface SWConfig {
 }
 
 export async function registerSW({
-  swUrl = 'src/worker.js',
+  swUrl = 'sw.js',
   scope = '/',
   onSuccess,
   onUpdate,
