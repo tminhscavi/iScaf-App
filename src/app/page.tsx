@@ -1,5 +1,6 @@
-import PWAFeatures from "@/components/PWAFeatures";
-import Image from "next/image";
+import InstallButton from '@/components/InstallButton';
+import PWAFeatures from '@/components/PWAFeatures';
+import Image from 'next/image';
 
 export default function Home() {
   return (
@@ -13,13 +14,11 @@ export default function Home() {
           height={38}
           priority
         />
-       <PWAFeatures />
 
-       
+        <InstallButton />
+        <PWAFeatures />
       </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        
-      </footer>
+      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center"></footer>
     </div>
   );
 }
