@@ -1,3 +1,5 @@
+'use client'
+
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 import { useEffect, useState, useCallback } from 'react'
 
@@ -20,7 +22,7 @@ interface QueuedAction {
 
 export function useNextPWA() {
   const [state, setState] = useState<PWAState>({
-    isOnline: typeof navigator !== 'undefined' ? navigator.onLine : true,
+    isOnline: true,
     isInstalled: false,
     updateAvailable: false,
     registration: null,

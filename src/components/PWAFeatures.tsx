@@ -1,9 +1,6 @@
-// components/PWAFeatures.tsx
 'use client'
 
 import { useNextPWA } from "@/hooks/usePWA"
-
-
 
 export default function PWAFeatures() {
   const {
@@ -30,8 +27,8 @@ export default function PWAFeatures() {
 
   return (
     <div className="space-y-4">
-      <div>Status: {isOnline ? '🟢 Online' : '🔴 Offline'}</div>
-      <div>Installed: {isInstalled ? '✅ Yes' : '❌ No'}</div>
+      <div>Status: {isOnline ? 'Online' : 'Offline'}</div>
+      <div>Installed: {isInstalled ? 'Yes' : 'No'}</div>
       
       {updateAvailable && (
         <button 
