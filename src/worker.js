@@ -81,7 +81,7 @@ self.addEventListener('push', (event) => {
         {
           action: 'open',
           title: 'Open',
-          icon: 'icons/icon-48x48.png',
+          icon: '/icons/icon-48x48.png',
         },
         {
           action: 'close',
@@ -285,9 +285,9 @@ self.addEventListener('install', (event) => {
       caches.open('critical-cache').then((cache) => {
         return cache
           .addAll([
-            'icons/icon-48x48.png',
-            'icons/icon-72x72.png',
-            'icons/icon-96x96.png'
+            '/icons/icon-48x48.png',
+            '/icons/icon-72x72.png',
+            '/icons/icon-96x96.png'
           ])
           .catch((error) => {
             console.warn('[SW] Failed to cache critical resources:', error);
