@@ -284,47 +284,6 @@ const QRScanner: React.FC<{
     };
   }, []);
 
-  const startQRScan = async (): Promise<void> => {
-    setIsScanning(true);
-    
-    // For demo purposes, we'll use camera + simulation
-    // In real implementation, replace this section with actual QR library
-    
-    try {
-      const mediaStream = await startCamera();
-      if (mediaStream && videoRef.current) {
-        videoRef.current.srcObject = mediaStream;
-        
-        // Simulate QR detection after a delay
-        setTimeout(() => {
-          const qrCodes = [
-            'https://github.com/your-repo',
-            'https://www.example.com/product/123',
-            'mailto:contact@example.com',
-            'tel:+1234567890',
-            'wifi:T:WPA;S:MyNetwork;P:password123;;',
-            JSON.stringify({ id: 12345, type: 'product', name: 'Scanner Demo' })
-          ];
-          
-          const randomQR = qrCodes[Math.floor(Math.random() * qrCodes.length)];
-          
-          const result: ScanResult = {
-            type: 'qr',
-            data: randomQR,
-            timestamp: new Date().toISOString(),
-            info: 'QR Code detected and decoded'
-          };
-          
-          onResult(result);
-          stopQRScan();
-        }, 3000);
-      }
-    } catch (err) {
-      onError('Failed to start QR scanning');
-      setIsScanning(false);
-    }
-  };
-
   const stopQRScan = (): void => {
     stopCamera();
     setIsScanning(false);
@@ -338,10 +297,8 @@ const QRScanner: React.FC<{
     }
   };
 
-  /* 
-  // Real implementation with html5-qrcode would look like this:
-  
-  const startQRScanReal = (): void => {
+
+  const startQRScan = (): void => {
     if (!qrReaderRef.current) return;
     
     import('html5-qrcode').then(({ Html5QrcodeScanner }) => {
@@ -380,7 +337,7 @@ const QRScanner: React.FC<{
       onError('Failed to load QR scanner library');
     });
   };
-  */
+
 
   return (
     <div className="bg-white rounded-xl shadow-lg p-6">
