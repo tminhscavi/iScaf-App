@@ -401,7 +401,7 @@ const QRScanner: React.FC<{
         {/* Hidden div for html5-qrcode library (if used) */}
         <div 
           ref={qrReaderRef} 
-          id={`qr-reader-${Math.random().toString(36).substr(2, 9)}`}
+          id={`qr-reader`}
           className="hidden"
         ></div>
       </div>
