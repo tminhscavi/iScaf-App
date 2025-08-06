@@ -9,15 +9,6 @@ const withPWA = PWA({
 
   swSrc: 'src/worker.js',
 
-  // Fallbacks for offline functionality
-  fallbacks: {
-    document: '/offline',
-    image: '',
-    audio: '',
-    video: '',
-    font: '',
-  },
-
   // Reload on update
   reloadOnOnline: true,
 

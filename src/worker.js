@@ -75,12 +75,6 @@ registerRoute(
   })
 )
 
-// Handle navigation requests with enhanced offline page
-const handler = createHandlerBoundToURL('/offline')
-const navigationRoute = new NavigationRoute(handler, {
-  denylist: [/^\/_/, /\/[^/?]+\.[^/]+$/, /^\/api\//]
-})
-registerRoute(navigationRoute)
 
 // Enhanced push notification handler with better error handling
 self.addEventListener('push', (event) => {
@@ -325,7 +319,6 @@ self.addEventListener('install', (event) => {
       // Pre-cache critical resources
       caches.open('critical-cache').then(cache => {
         return cache.addAll([
-          '/offline',
           '/icon-192x192.png',
           '/icon-48x48.png'
         ]).catch(error => {
@@ -370,20 +363,5 @@ self.addEventListener('sync', (event) => {
       // Handle any background sync logic here
       console.log('[SW] Handling API sync...')
     )
-  }
-})
-
-// Handle fetch events for better offline experience
-self.addEventListener('fetch', (event) => {
-  // Skip non-GET requests
-  if (event.request.method !== 'GET') return
-  
-  // Skip chrome-extension and other non-http(s) requests
-  if (!event.request.url.startsWith('http')) return
-  
-  // Let Workbox handle the caching
-  // This event listener is mainly for logging and debugging
-  if (event.request.url.includes('/api/')) {
-    console.log('[SW] API request:', event.request.url)
   }
 })
