@@ -48,7 +48,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <RegisterSW />
+      {/* <RegisterSW /> */}
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
