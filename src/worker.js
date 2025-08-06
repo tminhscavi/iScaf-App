@@ -35,30 +35,6 @@ registerRoute(
   })
 )
 
-// Enhanced API caching with background sync
-registerRoute(
-  ({ url }) => url.pathname.startsWith('/api/'),
-  new NetworkFirst({
-    cacheName: 'api-cache',
-    networkTimeoutSeconds: 10,
-    plugins: [
-      new ExpirationPlugin({
-        maxEntries: 50,
-        maxAgeSeconds: 5 * 60, // 5 minutes
-        purgeOnQuotaError: true
-      }),
-      new BackgroundSyncPlugin('api-sync', {
-        maxRetentionTime: 24 * 60 // 24 hours
-      }),
-      {
-        cacheWillUpdate: async ({ response }) => {
-          return response.status === 200 ? response : null
-        }
-      }
-    ]
-  })
-)
-
 // CSS and JS caching
 registerRoute(
   ({ request }) => 
@@ -288,25 +264,6 @@ async function getCacheInfo() {
   } catch (error) {
     console.error('[SW] Get cache info error:', error)
     return { error: error.message }
-  }
-}
-
-// New function to preload important URLs
-async function preloadUrls(urls) {
-  if (!urls || !Array.isArray(urls)) return
-  
-  try {
-    const cache = await caches.open('preload-cache')
-    await Promise.allSettled(urls.map(url => {
-      return fetch(url).then(response => {
-        if (response.ok) {
-          return cache.put(url, response.clone())
-        }
-      })
-    }))
-    console.log('[SW] URLs preloaded:', urls)
-  } catch (error) {
-    console.error('[SW] Preload URLs error:', error)
   }
 }
 

@@ -3,22 +3,23 @@ import PWA from 'next-pwa';
 
 const withPWA = PWA({
   dest: 'public',
-  register: false,
+  // register: true,
   skipWaiting: true,
   disable: process.env.NODE_ENV === 'development',
 
+  // 👇 Add your custom Service Worker source
   swSrc: 'src/worker.js',
 
-  // Reload on update
+  // Force reload SW when network comes back
   reloadOnOnline: true,
 
-  // Build exclusions
+  // Exclude files from precache manifest
   buildExcludes: [/middleware-manifest\.json$/],
 
-  // Mode
-  mode: 'production', // 'production' or 'development'
+  // Set Workbox mode
+  mode: 'production', // Can be set to 'development' to disable precache
 
-  // Precache manifest
+  // Transform manifest entries if needed
   manifestTransforms: [
     (manifestEntries) => {
       const manifest = manifestEntries.map((entry) => {
@@ -31,12 +32,13 @@ const withPWA = PWA({
     },
   ],
 
-  // Background sync
+  // Pre-cache when navigating via <Link>
   cacheOnFrontEndNav: true,
 });
 
 const nextConfig = {
   reactStrictMode: true,
+
 };
 
 export default withPWA(nextConfig);
