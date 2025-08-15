@@ -27,8 +27,8 @@ export default function PWAFeatures() {
 
   return (
     <div className="space-y-4">
-      <div>Status: {isOnline ? 'Online' : 'Offline'}</div>
-      <div>Installed: {isInstalled ? 'Yes' : 'No'}</div>
+      {/* <div>Status: {isOnline ? 'Online' : 'Offline'}</div>
+      <div>Installed: {isInstalled ? 'Yes' : 'No'}</div> */}
       
       {updateAvailable && (
         <button 
@@ -43,15 +43,15 @@ export default function PWAFeatures() {
         onClick={handleNotification}
         className="bg-green-500 text-white px-4 py-2 rounded"
       >
-        Test Notification
+        Test Thông báo
       </button>
       
-      <button 
+      {/* <button 
         onClick={() => clearCache()}
         className="bg-red-500 text-white px-4 py-2 rounded"
       >
         Clear Cache
-      </button>
+      </button> */}
     </div>
   )
 }

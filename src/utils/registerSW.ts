@@ -24,7 +24,7 @@ export async function registerSW({
 
   // Don't register in development (unless explicitly needed)
   if (process.env.NODE_ENV === 'development') {
-    console.log('Skipping SW registration in development')
+    // console.log('Skipping SW registration in development')
     return null
   }
 
@@ -34,7 +34,7 @@ export async function registerSW({
       updateViaCache: 'none'
     })
 
-    console.log('Service Worker registered:', registration.scope)
+    // console.log('Service Worker registered:', registration.scope)
 
     // Handle successful registration
     registration.addEventListener('updatefound', () => {
@@ -45,11 +45,11 @@ export async function registerSW({
         if (installingWorker.state === 'installed') {
           if (navigator.serviceWorker.controller) {
             // New content is available
-            console.log('New content is available; please refresh.')
+            // console.log('New content is available; please refresh.')
             onUpdate?.(registration)
           } else {
             // Content is cached for the first time
-            console.log('Content is cached for offline use.')
+            // console.log('Content is cached for offline use.')
             onSuccess?.(registration)
           }
         }
@@ -84,7 +84,7 @@ export async function unregisterSW(): Promise<boolean> {
   try {
     const registration = await navigator.serviceWorker.ready
     const result = await registration.unregister()
-    console.log('Service Worker unregistered:', result)
+    // console.log('Service Worker unregistered:', result)
     return result
   } catch (error) {
     console.error('Service Worker unregistration failed:', error)

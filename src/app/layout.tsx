@@ -17,7 +17,6 @@ export const metadata: Metadata = {
   title: 'iScaf',
   description: 'Scavi iScaf App',
   manifest: '/manifest.json',
-  viewport: 'width=device-width, initial-scale=1',
   appleWebApp: {
     capable: true,
     statusBarStyle: 'default',
@@ -50,9 +49,9 @@ export default function RootLayout({
     <html lang="en">
       <RegisterSW />
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={`${geistSans.variable} ${geistMono.variable} antialiased `}
       >
-        {children}
+        <div className="max-w-[475px] min-h-screen mx-auto">{children}</div>
       </body>
     </html>
   );

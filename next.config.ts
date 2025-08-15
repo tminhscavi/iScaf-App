@@ -16,7 +16,7 @@ const withPWA = PWA({
   // Exclude files from precache manifest
   buildExcludes: [
     /middleware-manifest\.json$/,
-    /app-build-manifest\.json$/, // 👈 Add this if needed
+    /app-build-manifest\.json$/, 
   ],
 
   // Set Workbox mode
