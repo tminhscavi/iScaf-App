@@ -22,12 +22,6 @@ export async function registerSW({
     return null
   }
 
-  // Don't register in development (unless explicitly needed)
-  if (process.env.NODE_ENV === 'development') {
-    // console.log('Skipping SW registration in development')
-    return null
-  }
-
   try {
     const registration = await navigator.serviceWorker.register(swUrl, { 
       scope,

@@ -6,11 +6,13 @@ import { debounce } from 'lodash';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/hooks/useAuth';
+import Scanner, { AdvancedBarcodeScanner } from '@/components/Scanner';
 
 export default function LoginPage() {
   const { login } = useAuth();
   const [username, setUsername] = useState('');
   const [pass, setPass] = useState('');
+  const [isScanning, setIsScanning] = useState(false);
 
   const handleChangeUsername = (query: string) => {
     console.log('Fetching results for:', query);
@@ -64,8 +66,8 @@ export default function LoginPage() {
         </div>
 
         <Button onClick={onLogin}>Đăng nhập</Button>
-
-        {/* <Scanner /> */}
+        <Button onClick={()=> setIsScanning(prev => !prev)}>Quét mã</Button>
+        <AdvancedBarcodeScanner />
       </div>
     </div>
   );
