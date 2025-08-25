@@ -1,28 +1,28 @@
 import { SignJWT } from 'jose';
 import { serialize } from 'cookie';
+import { TMember } from '@/types/member';
 
-async function validateUser(email: string, password: string) {
-  // Your user validation logic here
-  // Return user object if valid, null if invalid
-  return {
-    email,
-  };
+async function validateUser(member: TMember, password: string) {
+  if (member.Pass === password) {
+    return member;
+  }
+  return null;
 }
 
 export async function POST(request: Request) {
-  const { email, password } = await request.json();
-  
-  // Validate credentials (implement your logic)
-  const user = await validateUser(email, password);
+  const { member, password } = await request.json();
 
-  if (!user) {
-    return Response.json({ error: 'Invalid credentials' }, { status: 401 });
+  // Validate credentials (implement your logic)
+  const validatedMember = await validateUser(member, password);
+
+  if (!validatedMember) {
+    return Response.json({ error: 'Sai mật khẩu' }, { status: 200 });
   }
 
   // Create JWT token
   const secret = new TextEncoder().encode(process.env.JWT_SECRET!);
   const token = await new SignJWT({
-    email: user.email,
+    member: validatedMember,
   })
     .setProtectedHeader({ alg: 'HS256' })
     .setExpirationTime('24h')
@@ -38,8 +38,10 @@ export async function POST(request: Request) {
     path: '/',
   });
 
+  console.log('cookie', cookie);
+
   return Response.json(
-    { message: 'Login successful', user: { email: user.email } },
+    { message: 'Login successful', token },
     {
       status: 200,
       headers: { 'Set-Cookie': cookie },

@@ -1,0 +1,29 @@
+export type TMember = {
+  EmpCode: string
+  FullName: string
+  Dept: string
+  Cphone: string
+  Sex: string
+  QT: string
+  DirLab: number
+  Pass: string
+  Addr: string
+  AWard: string
+  ADistrict: string
+  ACity: string
+  LongAddress: string
+  Email: string
+  Position: string
+  Title: string
+  RegCode: string
+  Lday: number
+  Ltype: number
+  Loff: number
+  C1006PK: string
+  C1001PK: string
+  F40B: string
+  F40A: string
+  StartDate: string
+  DateKey: number
+  AllowLeaveHalfDay: boolean
+};

@@ -57,8 +57,6 @@ registerRoute(
 
 // Enhanced push notification handler with better error handling
 self.addEventListener('push', (event) => {
-  console.log('[SW] Push Received:', event);
-
   try {
     const data = event.data?.json() ?? {};
     const title = data.title || 'New Notification';
@@ -108,9 +106,8 @@ self.addEventListener('push', (event) => {
   }
 });
 
-// Enhanced notification click handler
+
 self.addEventListener('notificationclick', (event) => {
-  console.log('[SW] Notification click:', event);
 
   event.notification.close();
 

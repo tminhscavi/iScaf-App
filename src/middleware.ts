@@ -9,12 +9,8 @@ const authRoutes = ['/login', '/register'];
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
-  console.log('pathname', pathname);
-
   // Get the token from cookies
   const token = request.cookies.get('auth-token')?.value;
-
-  console.log('token', token);
 
   // Check if current route is protected
   const isProtectedRoute = protectedRoutes.some(

@@ -7,7 +7,6 @@ const withPWA = PWA({
   skipWaiting: true,
   disable: process.env.NODE_ENV === 'development',
 
-  // 👇 Add your custom Service Worker source
   swSrc: 'src/worker.js',
 
   // Force reload SW when network comes back

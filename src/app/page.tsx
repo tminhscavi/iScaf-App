@@ -1,8 +1,9 @@
-'use client'
+'use client';
 
 import InstallButton from '@/components/InstallButton';
 import PWAFeatures from '@/components/PWAFeatures';
 import { Button } from '@/components/ui/button';
+import { Separator } from '@/components/ui/separator';
 import { useAuth } from '@/hooks/useAuth';
 import Image from 'next/image';
 
@@ -13,20 +14,25 @@ export default function Home() {
   };
 
   return (
-    <div className="font-sans grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
+    <div className="grid justify-center min-h-screen">
+      <main className="flex flex-col gap-4 row-start-2 items-center">
         <Image
           src="/images/logo.png"
           alt="Logo"
-          width={240}
-          height={180}
+          width={320}
+          height={240}
           priority
         />
 
+        <Separator />
+
         <InstallButton />
         <PWAFeatures />
-
-        <Button onClick={onLogout}>Đăng xuất</Button>
+        
+        <Separator />
+        <Button variant={'destructive'} onClick={onLogout}>
+          Đăng xuất
+        </Button>
       </main>
       <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center"></footer>
     </div>
