@@ -32,21 +32,27 @@ export default function LoginPage() {
   const [username, setUsername] = useState('');
   const [pass, setPass] = useState('');
 
+  function formatUsername(value: string, factory?: { CompanyCodeHR: string }) {
+    const regex = /^[+-]?(?:0|[1-9]\d*)\.\d{6}$/;
+    if (regex.test(value)) {
+      return value; // already valid
+    }
+
+    // try to build from CompanyCodeHR + value
+    if (factory?.CompanyCodeHR && isNaN(Number(value))) {
+      const formatted = `${Number(factory.CompanyCodeHR)}.${value.padStart(
+        6,
+        '0',
+      )}`;
+      if (regex.test(formatted)) return formatted;
+    }
+
+    // fallback
+    return '1.000000';
+  }
   const handleChangeUsername = async (value: string) => {
     try {
-      const regex = /^[+-]?(?:0|[1-9]\d*)\.\d{6}$/;
-
-      const username = regex.test(value)
-        ? value
-        : isNaN(Number(value))
-        ? `${Number(factory?.CompanyCodeHR)}.${value.padStart(6, '0')}`
-        : value;
-
-      const parsedUserName = regex.test(username)
-        ? username //`${Number(factory?.CompanyCodeHR)}.000000`
-        : Number(
-            `${Number(factory?.CompanyCodeHR)}.${username.padStart(6, '0')}`,
-          ).toFixed(6);
+      const parsedUserName = formatUsername(value)
       setUsername(parsedUserName);
       const userInfo = await checkUser(
         factory?.CompanyCodeHR || '01',
