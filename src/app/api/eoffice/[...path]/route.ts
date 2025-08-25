@@ -3,10 +3,12 @@ import { NextRequest, NextResponse } from 'next/server';
 
 export async function GET(
   req: NextRequest,
-  { params }: { params: { path: string[] } },
+  context: { params: { path: string[] } }
 ) {
+    const { path } = context.params;
+
   const data = await api.get(
-    `/Eoffice/${params.path.join('/')}`,
+    `/Eoffice/${path.join('/')}`,
   );
 console.log('data',data);
 
