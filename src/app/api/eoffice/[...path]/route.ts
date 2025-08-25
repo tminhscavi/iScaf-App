@@ -3,14 +3,11 @@ import { NextRequest, NextResponse } from 'next/server';
 
 export async function GET(
   req: NextRequest,
-  context: { params: { path: string[] } }
+  context: { params: { path: string[] } },
 ) {
-    const { path } = context.params;
+  const { path } = context.params;
 
-  const data = await api.get(
-    `/Eoffice/${path.join('/')}`,
-  );
-console.log('data',data);
+  const data = await api.get(`/Eoffice/${path.join('/')}`);
 
   return NextResponse.json(data);
 }
