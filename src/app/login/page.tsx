@@ -27,7 +27,7 @@ import { toast } from 'sonner';
 export default function LoginPage() {
   const { member, setMember } = useAuthStore();
   const { checkUser, login } = useAuth();
-  const { data: factories } = useFactories();
+  const { data: factories, isLoading: factoryLoading } = useFactories();
   const [factory, setFactory] = useState<TFactory | null>(null);
   const [username, setUsername] = useState('');
   const [pass, setPass] = useState('');
@@ -115,7 +115,7 @@ export default function LoginPage() {
           />
         </motion.div>
 
-        <Select onValueChange={(value) => onChangeFactory(value)}>
+        <Select onValueChange={(value) => onChangeFactory(value)} disabled={factoryLoading}>
           <SelectTrigger className={cn('w-[250px] justify-self-center')}>
             <SelectValue placeholder="Chọn nhà máy" />
           </SelectTrigger>

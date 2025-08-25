@@ -19,8 +19,11 @@ export function useAuth() {
 
   const checkUser = async (comp: string, memberId: string) => {
     try {
-      const response = await api.get(
-        `/Eoffice/Eoffice_Get_Member_V2/COMP/${comp}/MEMBER/${memberId}/HR044/0`,
+      const response = await await api.get(
+        `/eoffice/Eoffice_Get_Member_V2/COMP/${comp}/MEMBER/${memberId}/HR044/0`,
+        {
+          baseURL: '/api',
+        },
       );
       return response;
     } catch (error) {
@@ -38,13 +41,13 @@ export function useAuth() {
         { member, password },
         { baseURL: '/api' },
       );
-      
+
       if (!response.error) {
         setToken(response.token);
         router.push('/');
         return { success: true };
       } else {
-        toast.error(response.error)
+        toast.error(response.error);
       }
     } catch (e) {
       console.error('login', e);
