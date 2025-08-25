@@ -86,17 +86,18 @@ export default function BarcodeScanner({
             console.log(`Scan successful: ${decodedText}`);
             
          
-            setScannedResults((prev) => {
+            // setScannedResults((prev) => {
             
-              if (!prev.includes(decodedText)) {
-                return [decodedText, ...prev.slice(0, 4)];
-              }
-              return prev;
-            });
+            //   if (!prev.includes(decodedText)) {
+            //     return [decodedText, ...prev.slice(0, 4)];
+            //   }
+            //   return prev;
+            // });
             setError('');
 
             if (onScan) {
               onScan(decodedText);
+              
             }
 
             if (stopAfterFirstScan) {

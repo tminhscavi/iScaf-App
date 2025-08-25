@@ -34,8 +34,14 @@ export default function LoginPage() {
 
   const handleChangeUsername = async (value: string) => {
     try {
-      const username = isNaN(Number(value)) ? '0' : value;
-      const regex = /^\d+\.000000$/;
+      const regex = /^[+-]?(?:0|[1-9]\d*)\.\d{6}$/;
+
+      const username = regex.test(value)
+        ? value
+        : isNaN(Number(value))
+        ? `${Number(factory?.CompanyCodeHR)}.${value.padStart(6, '0')}`
+        : value;
+
       const parsedUserName = regex.test(username)
         ? username //`${Number(factory?.CompanyCodeHR)}.000000`
         : Number(
@@ -115,7 +121,10 @@ export default function LoginPage() {
           />
         </motion.div>
 
-        <Select onValueChange={(value) => onChangeFactory(value)} disabled={factoryLoading}>
+        <Select
+          onValueChange={(value) => onChangeFactory(value)}
+          disabled={factoryLoading}
+        >
           <SelectTrigger className={cn('w-[250px] justify-self-center')}>
             <SelectValue placeholder="Chọn nhà máy" />
           </SelectTrigger>
