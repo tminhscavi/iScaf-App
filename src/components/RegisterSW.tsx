@@ -10,7 +10,7 @@ export default function RegisterSW() {
     autoRegisterSW({
       onSuccess: (reg) => console.log('SW registered:', reg),
       onUpdate: (reg) => {
-        if (confirm('New version available! Reload to update?')) {
+        if (confirm('Đã có phiên bản mới, vui lòng tải lại để cập nhật')) {
           window.location.reload();
         }
       },
