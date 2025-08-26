@@ -56,6 +56,9 @@ export default function BarcodeScanner({
         html5QrCodeRef.current.clear();
       } catch (err) {
         console.log('Graceful stop failed, forcing stop:', err);
+      } finally {
+        setIsScanning(false);
+        hasScannedRef.current = false;
       }
 
       // try {
@@ -85,9 +88,6 @@ export default function BarcodeScanner({
     // } catch (err) {
     //   console.log('Could not stop media tracks:', err);
     // }
-
-    setIsScanning(false);
-    hasScannedRef.current = false;
   }, []);
 
   const stopScanning = useCallback(async () => {

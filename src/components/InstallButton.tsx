@@ -1,6 +1,8 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
+import { Button } from './ui/button'
+import { cn } from '@/utils/styles'
 
 // Global interface extensions
 declare global {
@@ -185,12 +187,12 @@ export default function InstallButton({
   }
 
   return (
-    <button
+    <Button
       onClick={handleInstallClick}
       disabled={isInstalling || isInstalled}
-      className={`${className} ${
+      className={cn(`${className} ${
         isInstalling || isInstalled ? 'opacity-75 cursor-not-allowed' : ''
-      }`}
+      }`, 'w-full')}
       aria-label={
         isInstalled
           ? 'Progressive Web App is installed'
@@ -198,6 +200,6 @@ export default function InstallButton({
       }
     >
       {children || getButtonContent()}
-    </button>
+    </Button>
   )
 }
