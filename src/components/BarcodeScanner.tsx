@@ -16,14 +16,14 @@ interface IBarcodeScanner {
   startText?: string | ReactNode;
   stopText?: string | ReactNode;
   onScan?: (value: string) => void;
-  stopAfterFirstScan?: boolean; // New prop to control auto-stop behavior
+  stopAfterFirstScan?: boolean;
 }
 
 export default function BarcodeScanner({
   startText = 'Quét mã',
   stopText = 'Dừng quét',
   onScan,
-  stopAfterFirstScan = true, // Default to true for auto-stop
+  stopAfterFirstScan = true
 }: IBarcodeScanner) {
   const html5QrCodeRef = useRef<Html5Qrcode | null>(null);
   const [isScanning, setIsScanning] = useState(false);
@@ -50,7 +50,10 @@ export default function BarcodeScanner({
     }
 
     try {
-      await html5QrCodeRef.current.stop();
+      // Check if scanner is actually running before stopping
+      if (html5QrCodeRef.current.getState() === 2) { // 2 = SCANNING
+        await html5QrCodeRef.current.stop();
+      }
       html5QrCodeRef.current.clear();
     } catch (err) {
       console.error('Error stopping scanner:', err);
@@ -68,47 +71,45 @@ export default function BarcodeScanner({
     try {
       await checkCameraPermission();
       setIsScanning(true);
-      setTimeout(async () => {
-        const html5QrCode = new Html5Qrcode('scanner');
-        html5QrCodeRef.current = html5QrCode;
-
-        const config: Html5QrcodeCameraScanConfig = {
-          fps: 10,
-          qrbox: { width: 200, height: 200 },
-          aspectRatio: 1.0,
-          disableFlip: false,
-        };
-
-        await html5QrCode.start(
-          { facingMode: 'environment' },
-          config,
-          async (decodedText, decodedResult) => {
-            console.log(`Scan successful: ${decodedText}`);
-
-            // setScannedResults((prev) => {
-
-            //   if (!prev.includes(decodedText)) {
-            //     return [decodedText, ...prev.slice(0, 4)];
-            //   }
-            //   return prev;
-            // });
-            setError('');
-
-            if (onScan) {
-              onScan(decodedText);
-            }
-
-
-              stopScanning();
-            
-          },
-          (errorMessage) => {
-            // Suppress frequent scanning errors
-          },
-        );
-      }, 300);
-
       setError('');
+
+      // Add a small delay to ensure DOM is ready
+      await new Promise(resolve => setTimeout(resolve, 300));
+
+      const html5QrCode = new Html5Qrcode('scanner');
+      html5QrCodeRef.current = html5QrCode;
+
+      const config: Html5QrcodeCameraScanConfig = {
+        fps: 10,
+        qrbox: { width: 200, height: 200 },
+        aspectRatio: 1.0,
+        disableFlip: false,
+      };
+
+      await html5QrCode.start(
+        { facingMode: 'environment' },
+        config,
+        async (decodedText, decodedResult) => {
+          console.log(`Scan successful: ${decodedText}`);
+          
+          // Call onScan callback first
+          if (onScan) {
+            onScan(decodedText);
+          }
+
+          // Stop scanning after first scan if enabled
+          if (stopAfterFirstScan) {
+            // Use setTimeout to ensure the scan callback completes
+            setTimeout(async () => {
+              await stopScanning();
+            }, 100);
+          }
+        },
+        (errorMessage) => {
+          // Suppress frequent scanning errors
+        },
+      );
+
     } catch (err: any) {
       console.error('Failed to start scanning:', err);
       setError(err.message || 'Failed to start camera');
@@ -123,7 +124,7 @@ export default function BarcodeScanner({
 
   return (
     <div className="flex flex-col items-center">
-      <Dialog open={isScanning} onOpenChange={(open) => stopScanning()}>
+      <Dialog open={isScanning} onOpenChange={(open) => !open && stopScanning()}>
         <DialogContent forceMount className="justify-center">
           <DialogHeader>
             <DialogTitle>Scanning</DialogTitle>
