@@ -98,9 +98,9 @@ export default function BarcodeScanner({
               onScan(decodedText);
             }
 
-            if (stopAfterFirstScan) {
+
               stopScanning();
-            }
+            
           },
           (errorMessage) => {
             // Suppress frequent scanning errors
