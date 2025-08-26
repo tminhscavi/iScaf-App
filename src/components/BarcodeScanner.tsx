@@ -53,12 +53,12 @@ export default function BarcodeScanner({
       try {
         // Try to stop the scanner gracefully first
         await html5QrCodeRef.current.stop();
-        html5QrCodeRef.current.clear();
+        await html5QrCodeRef.current.clear();
       } catch (err) {
         console.log('Graceful stop failed, forcing stop:', err);
       } finally {
-        setIsScanning(false);
         hasScannedRef.current = false;
+        setIsScanning(false);
       }
 
       // try {
@@ -68,8 +68,6 @@ export default function BarcodeScanner({
       // } catch (err) {
       //   console.log('Clear failed:', err);
       // }
-
-      // html5QrCodeRef.current = null;
     }
 
     // // Force clear the scanner div content
@@ -104,7 +102,6 @@ export default function BarcodeScanner({
 
     try {
       await checkCameraPermission();
-      console.log('Starting scanner...');
 
       setIsScanning(true);
       setError('');
@@ -156,16 +153,7 @@ export default function BarcodeScanner({
             }, 50);
           }
         },
-        (errorMessage) => {
-          // Only log important errors
-          if (
-            errorMessage.includes('Permission') ||
-            errorMessage.includes('NotFound')
-          ) {
-            console.error('Scanner error:', errorMessage);
-            setError(errorMessage);
-          }
-        },
+        (errorMessage) => {},
       );
     } catch (err: any) {
       console.error('Failed to start scanning:', err);
@@ -211,7 +199,7 @@ export default function BarcodeScanner({
           </DialogHeader>
           <div
             className={cn(
-              'w-[400px] h-[400px] aspect-square border-2 border-gray-300 rounded-lg overflow-hidden bg-black',
+              'w-[90vw] h-[90vw] aspect-square border-2 border-gray-300 rounded-lg overflow-hidden bg-black',
               !isScanning && 'invisible w-0 h-0',
             )}
           >
@@ -225,11 +213,11 @@ export default function BarcodeScanner({
       </Dialog>
 
       <div className="text-center w-full max-w-md">
-        {error && (
+        {/* {error && (
           <div className="mb-4 p-3 bg-red-100 border border-red-300 rounded-md">
             <p className="text-sm text-red-700">{error}</p>
           </div>
-        )}
+        )} */}
 
         <div className="flex space-x-2 justify-center">
           {!isScanning ? (
