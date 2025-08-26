@@ -9,7 +9,7 @@ import {
 } from '@/components/ui/dialog';
 import { cn } from '@/utils/styles';
 import { Html5Qrcode, Html5QrcodeCameraScanConfig } from 'html5-qrcode';
-import { ReactNode, useRef, useState } from 'react';
+import { ReactNode, useRef, useState, useCallback, useEffect } from 'react';
 import { Button } from './ui/button';
 
 interface IBarcodeScanner {
@@ -32,6 +32,10 @@ export default function BarcodeScanner({
   const [cameraPermission, setCameraPermission] = useState<
     'granted' | 'denied' | 'prompt'
   >('prompt');
+  
+  // Flag to prevent multiple scans
+  const hasScannedRef = useRef(false);
+  const scannerElementRef = useRef<HTMLDivElement>(null);
 
   const checkCameraPermission = async () => {
     try {
@@ -44,37 +48,81 @@ export default function BarcodeScanner({
     }
   };
 
-  const stopScanning = async () => {
-    if (!html5QrCodeRef.current || !isScanning) {
-      return;
+  const forceStopScanning = useCallback(async () => {
+    console.log('Force stopping scanner...');
+    
+    if (html5QrCodeRef.current) {
+      try {
+        // Try to stop the scanner gracefully first
+        await html5QrCodeRef.current.stop();
+        console.log('Scanner stopped gracefully');
+      } catch (err) {
+        console.log('Graceful stop failed, forcing stop:', err);
+      }
+
+      try {
+        // Clear the scanner
+        html5QrCodeRef.current.clear();
+        console.log('Scanner cleared');
+      } catch (err) {
+        console.log('Clear failed:', err);
+      }
+
+      html5QrCodeRef.current = null;
     }
 
-    try {
-      // Check if scanner is actually running before stopping
-      if (html5QrCodeRef.current.getState() === 2) { // 2 = SCANNING
-        await html5QrCodeRef.current.stop();
-      }
-      html5QrCodeRef.current.clear();
-    } catch (err) {
-      console.error('Error stopping scanner:', err);
-    } finally {
-      html5QrCodeRef.current = null;
-      setIsScanning(false);
+    // Force clear the scanner div content
+    const scannerElement = document.getElementById('scanner');
+    if (scannerElement) {
+      scannerElement.innerHTML = '';
+      console.log('Scanner DOM cleared');
     }
-  };
+
+    // Stop all media tracks (force camera release)
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+      stream.getTracks().forEach(track => {
+        track.stop();
+        console.log('Media track stopped');
+      });
+    } catch (err) {
+      console.log('Could not stop media tracks:', err);
+    }
+
+    setIsScanning(false);
+    hasScannedRef.current = false;
+    console.log('Scanner force stopped completely');
+  }, []);
+
+  const stopScanning = useCallback(async () => {
+    if (!isScanning) return;
+    
+    console.log('Stopping scanner...');
+    await forceStopScanning();
+  }, [isScanning, forceStopScanning]);
 
   const startScanning = async () => {
     if (html5QrCodeRef.current || isScanning) {
+      console.log('Scanner already running, skipping start');
       return;
     }
 
     try {
       await checkCameraPermission();
+      console.log('Starting scanner...');
+      
       setIsScanning(true);
       setError('');
+      hasScannedRef.current = false;
 
-      // Add a small delay to ensure DOM is ready
-      await new Promise(resolve => setTimeout(resolve, 300));
+      // Wait for DOM to be ready
+      await new Promise(resolve => setTimeout(resolve, 500));
+
+      // Ensure scanner element is clean
+      const scannerElement = document.getElementById('scanner');
+      if (scannerElement) {
+        scannerElement.innerHTML = '';
+      }
 
       const html5QrCode = new Html5Qrcode('scanner');
       html5QrCodeRef.current = html5QrCode;
@@ -90,33 +138,70 @@ export default function BarcodeScanner({
         { facingMode: 'environment' },
         config,
         async (decodedText, decodedResult) => {
+          // Prevent multiple scans
+          if (hasScannedRef.current) {
+            console.log('Already scanned, ignoring:', decodedText);
+            return;
+          }
+
           console.log(`Scan successful: ${decodedText}`);
+          hasScannedRef.current = true;
           
-          // Call onScan callback first
+          // Call onScan callback
           if (onScan) {
-            onScan(decodedText);
+            try {
+              onScan(decodedText);
+            } catch (error) {
+              console.error('Error in onScan callback:', error);
+            }
           }
 
           // Stop scanning after first scan if enabled
           if (stopAfterFirstScan) {
-            // Use setTimeout to ensure the scan callback completes
+            console.log('stopAfterFirstScan is true, stopping...');
+            
+            // Use a very short delay to ensure the scan callback completes
             setTimeout(async () => {
-              await stopScanning();
-            }, 100);
+              await forceStopScanning();
+            }, 50);
           }
         },
         (errorMessage) => {
-          // Suppress frequent scanning errors
+          // Only log important errors
+          if (errorMessage.includes('Permission') || errorMessage.includes('NotFound')) {
+            console.error('Scanner error:', errorMessage);
+            setError(errorMessage);
+          }
         },
       );
+
+      console.log('Scanner started successfully');
 
     } catch (err: any) {
       console.error('Failed to start scanning:', err);
       setError(err.message || 'Failed to start camera');
       setIsScanning(false);
       html5QrCodeRef.current = null;
+      hasScannedRef.current = false;
     }
   };
+
+  const handleDialogClose = useCallback((open: boolean) => {
+    if (!open && isScanning) {
+      console.log('Dialog closing, stopping scanner');
+      stopScanning();
+    }
+  }, [isScanning, stopScanning]);
+
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      if (html5QrCodeRef.current) {
+        console.log('Component unmounting, cleaning up scanner');
+        forceStopScanning();
+      }
+    };
+  }, [forceStopScanning]);
 
   const clearResults = () => {
     setScannedResults([]);
@@ -124,10 +209,10 @@ export default function BarcodeScanner({
 
   return (
     <div className="flex flex-col items-center">
-      <Dialog open={isScanning} onOpenChange={(open) => !open && stopScanning()}>
+      <Dialog open={isScanning} onOpenChange={handleDialogClose}>
         <DialogContent forceMount className="justify-center">
           <DialogHeader>
-            <DialogTitle>Scanning</DialogTitle>
+            <DialogTitle>Scanning {hasScannedRef.current ? '(Stopping...)' : ''}</DialogTitle>
           </DialogHeader>
           <div
             className={cn(
@@ -135,7 +220,11 @@ export default function BarcodeScanner({
               !isScanning && 'invisible w-0 h-0',
             )}
           >
-            <div id="scanner" className="w-full h-full" />
+            <div 
+              id="scanner" 
+              ref={scannerElementRef}
+              className="w-full h-full" 
+            />
           </div>
         </DialogContent>
       </Dialog>
@@ -162,6 +251,12 @@ export default function BarcodeScanner({
             Vui lòng cấp quyền truy cập Camera
           </p>
         )}
+
+        {/* Debug info - remove in production */}
+        <div className="mt-2 text-xs text-gray-500">
+          <p>Scanning: {isScanning ? 'Yes' : 'No'}</p>
+          <p>Has Scanned: {hasScannedRef.current ? 'Yes' : 'No'}</p>
+        </div>
       </div>
     </div>
   );
