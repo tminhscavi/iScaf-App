@@ -23,7 +23,7 @@ export default function BarcodeScanner({
   startText = 'Quét mã',
   stopText = 'Dừng quét',
   onScan,
-  stopAfterFirstScan = true
+  stopAfterFirstScan = true,
 }: IBarcodeScanner) {
   const html5QrCodeRef = useRef<Html5Qrcode | null>(null);
   const [isScanning, setIsScanning] = useState(false);
@@ -32,7 +32,7 @@ export default function BarcodeScanner({
   const [cameraPermission, setCameraPermission] = useState<
     'granted' | 'denied' | 'prompt'
   >('prompt');
-  
+
   // Flag to prevent multiple scans
   const hasScannedRef = useRef(false);
   const scannerElementRef = useRef<HTMLDivElement>(null);
@@ -49,55 +49,50 @@ export default function BarcodeScanner({
   };
 
   const forceStopScanning = useCallback(async () => {
-    console.log('Force stopping scanner...');
-    
     if (html5QrCodeRef.current) {
       try {
         // Try to stop the scanner gracefully first
         await html5QrCodeRef.current.stop();
-        console.log('Scanner stopped gracefully');
+        html5QrCodeRef.current.clear();
       } catch (err) {
         console.log('Graceful stop failed, forcing stop:', err);
       }
 
-      try {
-        // Clear the scanner
-        html5QrCodeRef.current.clear();
-        console.log('Scanner cleared');
-      } catch (err) {
-        console.log('Clear failed:', err);
-      }
+      // try {
+      //   // Clear the scanner
 
-      html5QrCodeRef.current = null;
+      //   console.log('Scanner cleared');
+      // } catch (err) {
+      //   console.log('Clear failed:', err);
+      // }
+
+      // html5QrCodeRef.current = null;
     }
 
-    // Force clear the scanner div content
-    const scannerElement = document.getElementById('scanner');
-    if (scannerElement) {
-      scannerElement.innerHTML = '';
-      console.log('Scanner DOM cleared');
-    }
+    // // Force clear the scanner div content
+    // const scannerElement = document.getElementById('scanner');
+    // if (scannerElement) {
+    //   scannerElement.innerHTML = '';
+    // }
 
     // Stop all media tracks (force camera release)
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({ video: true });
-      stream.getTracks().forEach(track => {
-        track.stop();
-        console.log('Media track stopped');
-      });
-    } catch (err) {
-      console.log('Could not stop media tracks:', err);
-    }
+    // try {
+    //   const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+    //   stream.getTracks().forEach(track => {
+    //     track.stop();
+    //     console.log('Media track stopped');
+    //   });
+    // } catch (err) {
+    //   console.log('Could not stop media tracks:', err);
+    // }
 
     setIsScanning(false);
     hasScannedRef.current = false;
-    console.log('Scanner force stopped completely');
   }, []);
 
   const stopScanning = useCallback(async () => {
     if (!isScanning) return;
-    
-    console.log('Stopping scanner...');
+
     await forceStopScanning();
   }, [isScanning, forceStopScanning]);
 
@@ -110,13 +105,13 @@ export default function BarcodeScanner({
     try {
       await checkCameraPermission();
       console.log('Starting scanner...');
-      
+
       setIsScanning(true);
       setError('');
       hasScannedRef.current = false;
 
       // Wait for DOM to be ready
-      await new Promise(resolve => setTimeout(resolve, 500));
+      await new Promise((resolve) => setTimeout(resolve, 500));
 
       // Ensure scanner element is clean
       const scannerElement = document.getElementById('scanner');
@@ -139,15 +134,12 @@ export default function BarcodeScanner({
         config,
         async (decodedText, decodedResult) => {
           // Prevent multiple scans
-          if (hasScannedRef.current) {
-            console.log('Already scanned, ignoring:', decodedText);
+          if (stopAfterFirstScan && hasScannedRef.current) {
             return;
           }
 
-          console.log(`Scan successful: ${decodedText}`);
           hasScannedRef.current = true;
-          
-          // Call onScan callback
+
           if (onScan) {
             try {
               onScan(decodedText);
@@ -158,8 +150,6 @@ export default function BarcodeScanner({
 
           // Stop scanning after first scan if enabled
           if (stopAfterFirstScan) {
-            console.log('stopAfterFirstScan is true, stopping...');
-            
             // Use a very short delay to ensure the scan callback completes
             setTimeout(async () => {
               await forceStopScanning();
@@ -168,15 +158,15 @@ export default function BarcodeScanner({
         },
         (errorMessage) => {
           // Only log important errors
-          if (errorMessage.includes('Permission') || errorMessage.includes('NotFound')) {
+          if (
+            errorMessage.includes('Permission') ||
+            errorMessage.includes('NotFound')
+          ) {
             console.error('Scanner error:', errorMessage);
             setError(errorMessage);
           }
         },
       );
-
-      console.log('Scanner started successfully');
-
     } catch (err: any) {
       console.error('Failed to start scanning:', err);
       setError(err.message || 'Failed to start camera');
@@ -186,12 +176,15 @@ export default function BarcodeScanner({
     }
   };
 
-  const handleDialogClose = useCallback((open: boolean) => {
-    if (!open && isScanning) {
-      console.log('Dialog closing, stopping scanner');
-      stopScanning();
-    }
-  }, [isScanning, stopScanning]);
+  const handleDialogClose = useCallback(
+    (open: boolean) => {
+      if (!open && isScanning) {
+        console.log('Dialog closing, stopping scanner');
+        stopScanning();
+      }
+    },
+    [isScanning, stopScanning],
+  );
 
   // Cleanup on unmount
   useEffect(() => {
@@ -212,7 +205,9 @@ export default function BarcodeScanner({
       <Dialog open={isScanning} onOpenChange={handleDialogClose}>
         <DialogContent forceMount className="justify-center">
           <DialogHeader>
-            <DialogTitle>Scanning {hasScannedRef.current ? '(Stopping...)' : ''}</DialogTitle>
+            <DialogTitle>
+              Scanning {hasScannedRef.current ? '(Stopping...)' : ''}
+            </DialogTitle>
           </DialogHeader>
           <div
             className={cn(
@@ -220,10 +215,10 @@ export default function BarcodeScanner({
               !isScanning && 'invisible w-0 h-0',
             )}
           >
-            <div 
-              id="scanner" 
+            <div
+              id="scanner"
               ref={scannerElementRef}
-              className="w-full h-full" 
+              className="w-full h-full"
             />
           </div>
         </DialogContent>
@@ -251,12 +246,6 @@ export default function BarcodeScanner({
             Vui lòng cấp quyền truy cập Camera
           </p>
         )}
-
-        {/* Debug info - remove in production */}
-        <div className="mt-2 text-xs text-gray-500">
-          <p>Scanning: {isScanning ? 'Yes' : 'No'}</p>
-          <p>Has Scanned: {hasScannedRef.current ? 'Yes' : 'No'}</p>
-        </div>
       </div>
     </div>
   );
