@@ -23,7 +23,7 @@ export default function BarcodeScanner({
   startText = 'Quét mã',
   stopText = 'Dừng quét',
   onScan,
-  stopAfterFirstScan = true // Default to true for auto-stop
+  stopAfterFirstScan = true, // Default to true for auto-stop
 }: IBarcodeScanner) {
   const html5QrCodeRef = useRef<Html5Qrcode | null>(null);
   const [isScanning, setIsScanning] = useState(false);
@@ -84,10 +84,9 @@ export default function BarcodeScanner({
           config,
           async (decodedText, decodedResult) => {
             console.log(`Scan successful: ${decodedText}`);
-            
-         
+
             // setScannedResults((prev) => {
-            
+
             //   if (!prev.includes(decodedText)) {
             //     return [decodedText, ...prev.slice(0, 4)];
             //   }
@@ -97,11 +96,10 @@ export default function BarcodeScanner({
 
             if (onScan) {
               onScan(decodedText);
-              
             }
 
             if (stopAfterFirstScan) {
-              await stopScanning();
+              stopScanning();
             }
           },
           (errorMessage) => {
