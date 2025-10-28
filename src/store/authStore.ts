@@ -4,9 +4,12 @@ import { persist } from 'zustand/middleware';
 
 type TAuthState = {
   member: TMember | null;
+  companyCode: string | null;
+  token: string | null;
+  isAuthenticated: boolean;
   setMember: (data: TMember) => void;
   setToken: (data: string) => void;
-  token: string | null;
+  setCompanyCode: (data: string) => void;
   reset: () => void;
 };
 
@@ -14,11 +17,15 @@ export const useAuthStore = create<TAuthState>()(
   persist(
     (set) => ({
       member: null,
+      companyCode: null,
       token: null,
-      setToken: (data) => set({ token: data }),
+      isAuthenticated: false,
+
+      setToken: (data) => set({ token: data, isAuthenticated: true }),
       setMember: (data) => set({ member: data }),
-      reset: () => set({ member: null }),
+      setCompanyCode: (data) => set({ companyCode: data }),
+      reset: () => set({ member: null, token: null, isAuthenticated: false }),
     }),
-    { name: 'auth-storage' }, // localStorage key
+    { name: 'auth-storage' },
   ),
 );

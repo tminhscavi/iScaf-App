@@ -26,7 +26,7 @@ import { ChangeEvent, useCallback, useState } from 'react';
 import { toast } from 'sonner';
 
 export default function LoginPage() {
-  const { member, setMember } = useAuthStore();
+  const { member, setMember, setCompanyCode } = useAuthStore();
   const { factory, setFactory } = useFactoryStore();
   const { checkUser, login } = useAuth();
   const { data: factories, isLoading: factoryLoading } = useFactories();
@@ -34,7 +34,8 @@ export default function LoginPage() {
   const [username, setUsername] = useState('');
   const [pass, setPass] = useState('');
 
-  function formatUsername(value: string, factory?: { CompanyCodeHR: string }) {
+  function formatUsername(value: string, factory: { CompanyCodeHR: string }) {
+    const compPrefix = Number(factory.CompanyCodeHR);
     const regex = /^[+-]?(?:0|[1-9]\d*)\.\d{6}$/;
 
     if (regex.test(value)) {
@@ -43,36 +44,39 @@ export default function LoginPage() {
 
     // if it's a pure number without dot, format as "1.xxxxxx"
     if (!isNaN(Number(value)) && !value.includes('.')) {
-      return `1.${value.toString().padStart(6, '0').slice(0, 6)}`;
+      return `${compPrefix}.${value.toString().padStart(6, '0').slice(0, 6)}`;
     }
 
     // try to build from CompanyCodeHR + value (non-numeric string case)
-    if (factory?.CompanyCodeHR && isNaN(Number(value))) {
-      const formatted = `${Number(factory.CompanyCodeHR)}.${value.padStart(
-        6,
-        '0',
-      )}`;
+    if (factory.CompanyCodeHR && isNaN(Number(value))) {
+      const formatted = `${compPrefix}.${value.padStart(6, '0')}`;
       if (regex.test(formatted)) return formatted;
     }
 
     // fallback
-    return '1.000000';
+    return `${compPrefix}.000000`;
   }
 
   const handleChangeUsername = async (value: string) => {
     try {
       setIsSubmitting(true);
-      const parsedUserName = formatUsername(value);
-      setUsername(parsedUserName);
-      const userInfo = await checkUser(
-        factory?.CompanyCodeHR || '01',
-        parsedUserName,
-      );
-      if (userInfo) {
-        setMember(userInfo[0]);
-        return;
+      if (factory) {
+        const parsedUserName = formatUsername(value, {
+          CompanyCodeHR: factory.CompanyCodeHR || '01',
+        });
+        setUsername(parsedUserName);
+        const userInfo = await checkUser(
+          factory?.CompanyCodeHR || '01',
+          parsedUserName,
+        );
+        if (userInfo) {
+          setMember(userInfo[0]);
+          setCompanyCode(factory?.CompanyCodeHR || '01');
+
+          return;
+        }
+        toast.error('Không tìm thấy thông tin thành viên');
       }
-      toast.error('Không tìm thấy thông tin thành viên');
     } catch (e) {
       console.error('LoginPage', e);
     } finally {

@@ -15,13 +15,13 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: 'iScaf',
-  description: 'Scavi iScaf App',
+  title: 'iScaF',
+  description: 'Scavi iScaF App',
   manifest: '/manifest.json',
   appleWebApp: {
     capable: true,
     statusBarStyle: 'default',
-    title: 'iScaf',
+    title: 'iScaF',
   },
   formatDetection: {
     telephone: false,

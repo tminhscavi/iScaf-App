@@ -1,4 +1,4 @@
-/** @type {import('next').NextConfig} */
+import type { NextConfig } from 'next';
 import PWA from 'next-pwa';
 
 const withPWA = PWA({
@@ -13,10 +13,7 @@ const withPWA = PWA({
   reloadOnOnline: true,
 
   // Exclude files from precache manifest
-  buildExcludes: [
-    /middleware-manifest\.json$/,
-    /app-build-manifest\.json$/, 
-  ],
+  buildExcludes: [/middleware-manifest\.json$/, /app-build-manifest\.json$/],
 
   // Set Workbox mode
   mode: 'production', // Can be set to 'development' to disable precache
@@ -38,8 +35,17 @@ const withPWA = PWA({
   cacheOnFrontEndNav: true,
 });
 
-const nextConfig = {
+const nextConfig: NextConfig = {
   reactStrictMode: true,
+  images: {
+    remotePatterns: [
+      {
+        protocol: 'http',
+        hostname: '113.161.145.65',
+      },
+    ],
+  },
 };
 
-export default withPWA(nextConfig);
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export default withPWA(nextConfig as any);

@@ -34,11 +34,10 @@ export async function POST(request: Request) {
     httpOnly: true,
     secure: process.env.NODE_ENV === 'production',
     sameSite: 'strict',
-    maxAge: 60 * 60 * 24, // 24 hours
+    maxAge: 60 * 60 * 24 * 7, // 7 days
     path: '/',
   });
 
-  console.log('cookie', cookie);
 
   return Response.json(
     { message: 'Login successful', token },

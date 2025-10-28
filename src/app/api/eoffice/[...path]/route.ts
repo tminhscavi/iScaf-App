@@ -8,5 +8,9 @@ export async function GET(req: NextRequest, context: any) {
 
   const data = await api.get(`/Eoffice/${path.join('/')}`);
 
-  return NextResponse.json(data);
+  if (data) {
+    return NextResponse.json(data);
+  }
+
+  return NextResponse.error();
 }

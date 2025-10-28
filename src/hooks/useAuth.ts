@@ -8,7 +8,7 @@ import { useState } from 'react';
 import { toast } from 'sonner';
 
 export function useAuth() {
-  const { setToken } = useAuthStore();
+  const { token, setToken, reset } = useAuthStore();
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const router = useRouter();
@@ -34,6 +34,27 @@ export function useAuth() {
     }
   };
 
+  const checkAuth = async () => {
+    try {
+      if (token) {
+        const response = await api.post(
+          '/auth/initialize',
+          { token },
+          { baseURL: '/api' },
+        );
+        if (!response.error) {
+          router.push('/');
+          return { success: true };
+        } else {
+          await logout();
+        }
+      }
+      return null;
+    } catch (e) {
+      console.error('login', e);
+    }
+  };
+
   const login = async (member: TMember, password: string) => {
     try {
       const response = await api.post(
@@ -56,9 +77,10 @@ export function useAuth() {
 
   const logout = async () => {
     await api.post('/auth/logout', {}, { baseURL: '/api' });
+    reset();
     setUser(null);
     router.push('/login');
   };
 
-  return { user, loading, login, logout, checkUser };
+  return { user, loading, login, logout, checkAuth, checkUser };
 }

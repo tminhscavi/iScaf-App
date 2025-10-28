@@ -27,3 +27,33 @@ export type TMember = {
   DateKey: number
   AllowLeaveHalfDay: boolean
 };
+
+export type TMemberProfile = {
+  Gender: string
+  Datebirth: string
+  Identify: string
+  Cellphone: string
+  StartingDate: string
+  DateOfContract: string
+  PersonalTaxCode: string
+  BHXH: string
+  BHYT: string
+  STK: string
+  NameBank: string
+  Img: string
+  CountryPermanentPk: string
+  ProvincePermanentPk: string
+  WardPermanentPk: string
+  AddressPermanent: string
+  AddressPermanentSecondLanguage: string
+  CountryTemporaryPk: string
+  ProvinceTemporaryPk: string
+  WardTemporaryPk: string
+  AddressTemporary: string
+  AddressTemporarySecondLanguage: string
+  CountryHomeTownPk: string
+  ProvinceHomeTownPk: string
+  WardHomeTownPk: string
+  AddressHomeTown: string
+  AddressHomeTownSecondLanguage: string
+}

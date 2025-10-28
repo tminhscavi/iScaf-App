@@ -53,10 +53,11 @@ export default function BarcodeScanner({
       try {
         // Try to stop the scanner gracefully first
         await html5QrCodeRef.current.stop();
-        await html5QrCodeRef.current.clear();
+        html5QrCodeRef.current.clear();
       } catch (err) {
-        console.log('Graceful stop failed, forcing stop:', err);
+        console.warn('Graceful stop failed:', err);
       } finally {
+        html5QrCodeRef.current = null;
         hasScannedRef.current = false;
         setIsScanning(false);
       }
@@ -199,7 +200,7 @@ export default function BarcodeScanner({
           </DialogHeader>
           <div
             className={cn(
-              'w-[90vw] h-[90vw] aspect-square border-2 border-gray-300 rounded-lg overflow-hidden bg-black',
+              'w-[90vw] h-[90vw] md:h-[480px] md:w-[480px] aspect-square border-2 border-gray-300 rounded-lg overflow-hidden bg-black',
               !isScanning && 'invisible w-0 h-0',
             )}
           >
