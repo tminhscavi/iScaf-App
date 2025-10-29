@@ -12,7 +12,7 @@ async function getFactories() {
 export const useFactories = (options?: UseQueryOptions<TFactory[], Error>) => {
   return useQuery({
     queryKey: ['factories'],
-    queryFn: (): Promise<TFactory[]> => getFactories(), //getFactories()
+    queryFn: async (): Promise<TFactory[]> => await getFactories(), //getFactories()
     ...options,
   });
 };

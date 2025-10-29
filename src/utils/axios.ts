@@ -19,20 +19,44 @@ export interface ApiError {
   code?: string;
 }
 
+export interface AxiosConfigOptions {
+  baseURL?: string;
+  timeout?: number;
+  withCredentials?: boolean;
+  tokenCookieName?: string;
+  enableTokenRefresh?: boolean;
+  refreshEndpoint?: string;
+  onAuthFailure?: () => void;
+}
+
 class AxiosConfig {
-  private static instance: AxiosConfig;
+  private static instances: Map<string, AxiosConfig> = new Map();
   private axiosInstance: AxiosInstance;
   private isRefreshing = false;
   private failedQueue: Array<{
     resolve: (value: any) => void;
     reject: (reason: any) => void;
   }> = [];
+  private options: Required<AxiosConfigOptions>;
 
-  private constructor() {
+  private constructor(instanceName: string, options?: AxiosConfigOptions) {
+    // Merge with defaults
+    this.options = {
+      baseURL:
+        options?.baseURL || `${process.env.NEXT_PUBLIC_API_URL}/api` || '/api',
+      timeout: options?.timeout || 30000,
+      withCredentials:
+        options?.withCredentials ?? process.env.NODE_ENV === 'production',
+      tokenCookieName: options?.tokenCookieName || 'auth-token',
+      enableTokenRefresh: options?.enableTokenRefresh ?? true,
+      refreshEndpoint: options?.refreshEndpoint || '/auth/refresh',
+      onAuthFailure: options?.onAuthFailure || this.defaultAuthFailureHandler,
+    };
+
     this.axiosInstance = axios.create({
-      baseURL: `${process.env.NEXT_PUBLIC_API_URL}/api` || '/api',
-      timeout: 30000,
-      withCredentials: process.env.NODE_ENV === 'production',
+      baseURL: this.options.baseURL,
+      timeout: this.options.timeout,
+      withCredentials: this.options.withCredentials,
       headers: {
         'Content-Type': 'application/json',
         Accept: 'application/json',
@@ -42,25 +66,48 @@ class AxiosConfig {
     this.setupInterceptors();
   }
 
-  public static getInstance(): AxiosConfig {
-    if (!AxiosConfig.instance) {
-      AxiosConfig.instance = new AxiosConfig();
+  public static getInstance(
+    instanceName: string = 'default',
+    options?: AxiosConfigOptions,
+  ): AxiosConfig {
+    if (!AxiosConfig.instances.has(instanceName)) {
+      AxiosConfig.instances.set(
+        instanceName,
+        new AxiosConfig(instanceName, options),
+      );
     }
-    return AxiosConfig.instance;
+    return AxiosConfig.instances.get(instanceName)!;
+  }
+
+  public static clearInstance(instanceName: string): void {
+    AxiosConfig.instances.delete(instanceName);
+  }
+
+  public static clearAllInstances(): void {
+    AxiosConfig.instances.clear();
   }
 
   public getAxiosInstance(): AxiosInstance {
     return this.axiosInstance;
   }
 
+  public updateToken(token: string): void {
+    // Update the default authorization header
+    this.axiosInstance.defaults.headers.common[
+      'Authorization'
+    ] = `Bearer ${token}`;
+  }
+
+  public clearToken(): void {
+    delete this.axiosInstance.defaults.headers.common['Authorization'];
+  }
+
   private setupInterceptors(): void {
     // Request interceptor
     this.axiosInstance.interceptors.request.use(
-      (
-        config: any, // AxiosRequestConfig
-      ) => {
+      (config: any) => {
         // Add auth token if available
-        const token = getCookie('auth-token');
+        const token = getCookie(this.options.tokenCookieName);
         if (token && config.headers) {
           config.headers.Authorization = `Bearer ${token}`;
         }
@@ -69,10 +116,6 @@ class AxiosConfig {
         if (process.env.NODE_ENV === 'development') {
           console.log(
             `🚀 Request: ${config.method?.toUpperCase()} ${config.url}`,
-            // {
-            //   data: config.data,
-            //   params: config.params,
-            // }
           );
         }
 
@@ -98,43 +141,63 @@ class AxiosConfig {
         return response;
       },
       async (error: AxiosError) => {
-        // const originalRequest = error.config as AxiosRequestConfig & { _retry?: boolean }
-        // // Handle token refresh for 401 errors
-        // if (error.response?.status === 401 && !originalRequest._retry) {
-        //   if (this.isRefreshing) {
-        //     // If already refreshing, queue the request
-        //     return new Promise((resolve, reject) => {
-        //       this.failedQueue.push({ resolve, reject })
-        //     }).then((token) => {
-        //       if (originalRequest.headers) {
-        //         originalRequest.headers.Authorization = `Bearer ${token}`
-        //       }
-        //       return this.axiosInstance(originalRequest)
-        //     }).catch((err) => {
-        //       return Promise.reject(err)
-        //     })
-        //   }
-        //   originalRequest._retry = true
-        //   this.isRefreshing = true
-        //   try {
-        //     const refreshResponse = await this.axiosInstance.post('/auth/refresh')
-        //     const { token } = refreshResponse.data
-        //     // Process queued requests
-        //     this.processQueue(null, token)
-        //     // Retry original request
-        //     if (originalRequest.headers) {
-        //       originalRequest.headers.Authorization = `Bearer ${token}`
-        //     }
-        //     return this.axiosInstance(originalRequest)
-        //   } catch (refreshError) {
-        //     this.processQueue(refreshError, null)
-        //     this.handleAuthFailure()
-        //     return Promise.reject(this.handleError(error))
-        //   } finally {
-        //     this.isRefreshing = false
-        //   }
-        // }
-        // return Promise.reject(this.handleError(error))
+        const originalRequest = error.config as AxiosRequestConfig & {
+          _retry?: boolean;
+        };
+
+        // Handle token refresh for 401 errors (only if enabled)
+        if (
+          this.options.enableTokenRefresh &&
+          error.response?.status === 401 &&
+          originalRequest &&
+          !originalRequest._retry
+        ) {
+          // If already refreshing, queue the request
+          if (this.isRefreshing) {
+            return new Promise((resolve, reject) => {
+              this.failedQueue.push({ resolve, reject });
+            })
+              .then((token) => {
+                if (originalRequest.headers) {
+                  originalRequest.headers.Authorization = `Bearer ${token}`;
+                }
+                return this.axiosInstance(originalRequest);
+              })
+              .catch((err) => {
+                return Promise.reject(err);
+              });
+          }
+
+          originalRequest._retry = true;
+          this.isRefreshing = true;
+
+          try {
+            // Attempt to refresh the token
+            const refreshResponse = await this.axiosInstance.post(
+              this.options.refreshEndpoint,
+            );
+            const { token } = refreshResponse.data;
+
+            // Process queued requests with new token
+            this.processQueue(null, token);
+
+            // Retry original request with new token
+            if (originalRequest.headers) {
+              originalRequest.headers.Authorization = `Bearer ${token}`;
+            }
+            return this.axiosInstance(originalRequest);
+          } catch (refreshError) {
+            // Failed to refresh token
+            this.processQueue(refreshError, null);
+            this.options.onAuthFailure();
+            return Promise.reject(this.handleError(error));
+          } finally {
+            this.isRefreshing = false;
+          }
+        }
+
+        // Handle other errors
+        return Promise.reject(this.handleError(error));
       },
     );
   }
@@ -151,7 +214,7 @@ class AxiosConfig {
     this.failedQueue = [];
   }
 
-  private handleAuthFailure(): void {
+  private defaultAuthFailureHandler(): void {
     // Clear auth data
     deleteCookie('auth-token');
     deleteCookie('user-data');
@@ -290,13 +353,11 @@ class AxiosConfig {
   }
 }
 
-// Export singleton instance
-export const apiClient = AxiosConfig.getInstance();
-
-// Export axios instance for direct use
+// Export default instance
+export const apiClient = AxiosConfig.getInstance('default');
 export const axiosInstance = apiClient.getAxiosInstance();
 
-// Export helper methods
+// Export helper methods for default instance
 export const api = {
   get: <T = any>(url: string, config?: AxiosRequestConfig) =>
     apiClient.get<T>(url, config),
@@ -315,4 +376,35 @@ export const api = {
   ) => apiClient.upload<T>(url, formData, onUploadProgress),
   download: (url: string, filename?: string) =>
     apiClient.download(url, filename),
+};
+
+// Helper function to create additional instances
+export const createApiInstance = (
+  instanceName: string,
+  options?: AxiosConfigOptions,
+) => {
+  const instance = AxiosConfig.getInstance(instanceName, options);
+  return {
+    client: instance,
+    axiosInstance: instance.getAxiosInstance(),
+    api: {
+      get: <T = any>(url: string, config?: AxiosRequestConfig) =>
+        instance.get<T>(url, config),
+      post: <T = any>(url: string, data?: any, config?: AxiosRequestConfig) =>
+        instance.post<T>(url, data, config),
+      put: <T = any>(url: string, data?: any, config?: AxiosRequestConfig) =>
+        instance.put<T>(url, data, config),
+      patch: <T = any>(url: string, data?: any, config?: AxiosRequestConfig) =>
+        instance.patch<T>(url, data, config),
+      delete: <T = any>(url: string, config?: AxiosRequestConfig) =>
+        instance.delete<T>(url, config),
+      upload: <T = any>(
+        url: string,
+        formData: FormData,
+        onUploadProgress?: (progressEvent: any) => void,
+      ) => instance.upload<T>(url, formData, onUploadProgress),
+      download: (url: string, filename?: string) =>
+        instance.download(url, filename),
+    },
+  };
 };

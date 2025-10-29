@@ -3,16 +3,17 @@ import { persist } from 'zustand/middleware';
 
 type TAppState = {
   isLoading: boolean;
+  spToken: string | null;
   setIsLoading: (data: boolean) => void;
+  setSPToken: (data: string) => void;
 };
 
-export const useAppStore = create<TAppState>()(
-  persist(
-    (set) => ({
-      isLoading: false,
+export const useAppStore = create<TAppState>()((set) => ({
+  // Initial State
+  isLoading: false,
+  spToken: null,
 
-      setIsLoading: (data) => set({ isLoading: data }),
-    }),
-    { name: 'app-storage' }, // localStorage key
-  ),
-);
+  // Actions
+  setIsLoading: (data) => set({ isLoading: data }),
+  setSPToken: (data) => set({ spToken: data }),
+}));

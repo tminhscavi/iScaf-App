@@ -1,85 +1,76 @@
 'use client';
 
-import InstallButton from '@/components/InstallButton';
 import AuthenticatedLayout from '@/components/layouts/AuthenticatedLayout';
-import PWAFeatures from '@/components/PWAFeatures';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardFooter } from '@/components/ui/card';
+import {
+  Card,
+  CardContent,
+  CardFooter,
+  CardHeader,
+} from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { loginRequest } from '@/constants/msalConfig';
-import { useAuth } from '@/hooks/useAuth';
+import { useNotifications } from '@/hooks/queries/sharepoint/useNotification';
 import { useAppStore } from '@/store/appStore';
 import { useAuthStore } from '@/store/authStore';
 import { useMsal } from '@azure/msal-react';
-import axios from 'axios';
+import { setCookie } from 'cookies-next/client';
 import Image from 'next/image';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { toast } from 'sonner';
 
 export default function Home() {
-  const { isLoading, setIsLoading } = useAppStore();
-  const { logout } = useAuth();
   const { member } = useAuthStore();
-  const [accessToken, setAccessToken] = useState<string | null>(null);
+  const { spToken, setSPToken } = useAppStore();
   const { instance, accounts } = useMsal();
-  const [listItems, setListItems] = useState([]);
+  const { data: notiData } = useNotifications(
+    {
+      queryKey: ['user-notifications', member?.EmpCode],
+      enabled: !!spToken && !!member,
+    },
+    {
+      memberCode: member?.EmpCode || '',
+    },
+  );
+
   const [loading, setLoading] = useState(false);
 
-  const fetchListItems = async () => {
-    setLoading(true);
+  const authenticateSharePoint = async () => {
     try {
       if (accounts.length > 0) {
-        // Get access token
         const response = await instance.acquireTokenSilent({
           ...loginRequest,
           account: accounts[0],
         });
-
-        // Fetch SharePoint list items
-        const siteId =
-          'scavigroup.sharepoint.com,11e1b152-a183-43f0-bc6e-927f1d96a61f,1baeb911-b152-4cf6-b567-05ca4a634eb9';
-        const listId = '6b537779-1466-44db-80f5-f39c4c104a21';
-
-        const listData = await axios.get(
-          `https://graph.microsoft.com/v1.0/sites/${siteId}/lists/${listId}/items?expand=fields`,
-          {
-            headers: {
-              Authorization: `Bearer ${response.accessToken}`,
-            },
-          },
-        );
-
-        setListItems(listData.data.value);
+        setCookie('msal-token', response.accessToken, {
+          maxAge: 60 * 60 * 24 * 30,
+          path: '/',
+        });
+        setSPToken(response.accessToken);
+        return;
       }
-    } catch (error) {
-      console.error('Error fetching list:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
 
-  const handleLoginSharePoint = async () => {
-    try {
-      await instance.loginPopup(loginRequest);
+      const account = await instance.loginPopup(loginRequest);
+      setCookie('msal-token', account.accessToken, {
+        maxAge: 60 * 60 * 24 * 30,
+        path: '/',
+      });
+      setSPToken(account.accessToken);
     } catch (error) {
       console.error('Login failed:', error);
+      toast.error('Kết nối SharePoint thất bại');
     }
   };
 
-  const onLogout = async () => {
-    try {
-      setIsLoading(true);
-      await logout();
-    } catch (e) {
-      console.log('logout', e);
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  useEffect(() => {
+    setTimeout(() => {
+      authenticateSharePoint();
+    }, 300);
+  }, []);
 
   return (
     <AuthenticatedLayout>
-      <main className="grid justify-center min-h-screen">
-        <div className="flex flex-col gap-4 row-start-2 items-center">
+      <main className="min-h-screen p-4">
+        <div className="flex flex-col gap-4 row-start-2">
           <Image
             src="/images/logo.png"
             alt="Logo"
@@ -88,23 +79,27 @@ export default function Home() {
             priority
           />
 
-          <Separator />
+          <Separator className="my-2 bg-primary" />
           <p>Xin chào, {member?.FullName}</p>
           <Card className="w-full">
+            <CardHeader className="font-bold">Thông báo mới nhất</CardHeader>
+            <Separator />
             <CardContent className="gap-4 grid">
-              {/* <InstallButton />
-            <PWAFeatures /> */}
+              {notiData && notiData.length > 0 ? (
+                notiData.slice(0, 5).map((noti) => (
+                  <div key={noti.id} className="p-2 border-b">
+                    <p className="font-semibold">{noti.title}</p>
+                    <p className="text-sm text-gray-600">
+                      {new Date(noti.created).toLocaleDateString()}
+                    </p>
+                  </div>
+                ))
+              ) : (
+                <p>Không có thông báo mới</p>
+              )}
             </CardContent>
             <CardFooter className="flex-col gap-2">
               <Separator />
-              <Button
-                variant={'destructive'}
-                onClick={onLogout}
-                className="w-full"
-                disabled={isLoading}
-              >
-                Đăng xuất
-              </Button>
             </CardFooter>
           </Card>
         </div>

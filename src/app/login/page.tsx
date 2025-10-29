@@ -203,7 +203,7 @@ export default function LoginPage() {
                   />
                 </div>
               </CardContent>
-              <CardFooter className="flex-col gap-2">
+              <CardFooter className="flex-col gap-2 mt-4">
                 <Button
                   onClick={onLogin}
                   className="w-full"

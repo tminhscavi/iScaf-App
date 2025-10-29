@@ -19,8 +19,8 @@ export const useAuthStore = create<TAuthState>()(
       member: null,
       companyCode: null,
       token: null,
+      spToken: null,
       isAuthenticated: false,
-
       setToken: (data) => set({ token: data, isAuthenticated: true }),
       setMember: (data) => set({ member: data }),
       setCompanyCode: (data) => set({ companyCode: data }),
