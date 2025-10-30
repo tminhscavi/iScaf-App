@@ -1,24 +1,15 @@
 'use client';
 
 import BarcodeScanner from '@/components/BarcodeScanner';
+import { Combobox } from '@/components/ComboBox';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectLabel,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
-import { Separator } from '@/components/ui/separator';
 import { useFactories } from '@/hooks/queries/useFactories';
 import { useAuth } from '@/hooks/useAuth';
 import { useAuthStore } from '@/store/authStore';
 import { useFactoryStore } from '@/store/factoryStore';
-import { cn } from '@/utils/styles';
+import { handleParseMultipleSelectOptions } from '@/utils/component/combobox';
 import { motion } from 'framer-motion';
 import { debounce } from 'lodash';
 import Image from 'next/image';
@@ -149,70 +140,71 @@ export default function LoginPage() {
             priority
           />
         </motion.div>
-        <Separator />
+
         <div className="px-2 grid gap-5">
-          <Select
-            onValueChange={(value) => onChangeFactory(value)}
-            defaultValue={factoryLoading ? '' : factory?.PK}
+          <Combobox
+            onChange={(value: string) => onChangeFactory(value)}
+            value={factoryLoading ? '' : factory?.PK}
             disabled={factoryLoading}
-          >
-            <SelectTrigger className={cn('w-full justify-self-center')}>
-              <SelectValue placeholder="Chọn nhà máy" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectGroup>
-                <SelectLabel>Nhà máy</SelectLabel>
-                {factories?.map((factory) => (
-                  <SelectItem key={factory.PK} value={factory.PK}>
-                    {factory.Factory}
-                  </SelectItem>
-                ))}
-              </SelectGroup>
-            </SelectContent>
-          </Select>
+            placeholder="Chọn nhà máy"
+            options={handleParseMultipleSelectOptions({
+              optionData:
+                factories?.sort(
+                  (a, b) => Number(a.CompanyCodeHR) - Number(b.CompanyCodeHR),
+                ) || [],
+              labelKey: 'Factory',
+              valueKey: 'PK',
+              groupKey: 'CompanyCodeHR',
+            })}
+            hasGroup
+            loading={factoryLoading}
+          />
 
           {factory && (
-            <Card className="w-full">
-              {/* <CardHeader>
+            <form onSubmit={onLogin}>
+              <Card className="w-full">
+                {/* <CardHeader>
                 <CardTitle>Đăng Nhập</CardTitle>
               </CardHeader> */}
 
-              <CardContent>
-                <div className="flex flex-col gap-2 w-full">
-                  <div className="flex justify-between items-end">
-                    <p className="font-semibold">MSTV</p>
-                    <BarcodeScanner
-                      stopAfterFirstScan
-                      onScan={(value) => handleChangeUsername(value)}
+                <CardContent className="grid gap-4">
+                  <div className="flex flex-col gap-2 w-full">
+                    <div className="flex justify-between items-end">
+                      <p className="font-semibold">MSTV</p>
+                      <BarcodeScanner
+                        stopAfterFirstScan
+                        onScan={(value) => handleChangeUsername(value)}
+                      />
+                    </div>
+
+                    <Input
+                      type="text"
+                      value={username}
+                      onChange={onChangeUsername}
+                      disabled={isSubmitting}
                     />
                   </div>
-
-                  <Input
-                    type="text"
-                    value={username}
-                    onChange={onChangeUsername}
+                  <div className="flex flex-col gap-2 w-full">
+                    <p className="font-semibold">Mật khẩu</p>
+                    <Input
+                      type="password"
+                      value={pass}
+                      onChange={(e) => setPass(e.target.value)}
+                    />
+                  </div>
+                </CardContent>
+                <CardFooter className="flex-col gap-2 mt-4">
+                  <Button
+                    type="submit"
+                    // onClick={onLogin}
+                    className="w-full"
                     disabled={isSubmitting}
-                  />
-                </div>
-                <div className="flex flex-col gap-2 w-full">
-                  <p className="font-semibold">Mật khẩu</p>
-                  <Input
-                    type="password"
-                    value={pass}
-                    onChange={(e) => setPass(e.target.value)}
-                  />
-                </div>
-              </CardContent>
-              <CardFooter className="flex-col gap-2 mt-4">
-                <Button
-                  onClick={onLogin}
-                  className="w-full"
-                  disabled={isSubmitting}
-                >
-                  Đăng nhập
-                </Button>
-              </CardFooter>
-            </Card>
+                  >
+                    Đăng nhập
+                  </Button>
+                </CardFooter>
+              </Card>
+            </form>
           )}
         </div>
       </div>

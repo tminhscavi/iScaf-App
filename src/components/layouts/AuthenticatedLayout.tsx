@@ -14,7 +14,7 @@ export default function AuthenticatedLayout({ children }: { children: any }) {
 
   return (
     <>
-      <div className="overflow-y-auto h-[90vh]">{children}</div>
+      <div className="overflow-y-auto grow">{children}</div>
       <NavigationBar />
     </>
   );

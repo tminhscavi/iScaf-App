@@ -32,7 +32,7 @@ export default function AuthenticatedLayoutWithHeader({
           <ChevronLeft className="h-full w-10 text-white" />
         </div>
       </div>
-      <div className="overflow-y-auto h-[83vh]">{children}</div>
+      <div className="overflow-y-auto grow">{children}</div>
       <NavigationBar />
     </>
   );

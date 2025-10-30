@@ -26,7 +26,7 @@ const getNotifications = async (memberCode = '') => {
   try {
     const response = await getList(
       notiListId,
-      `&$filter=fields/ID_x002d_MSTV eq '${memberCode}'&$top=1000`,
+      `&$filter=fields/ID_x002d_MSTV eq '${memberCode}'&$top=50`,
     );
     return response;
   } catch (error) {

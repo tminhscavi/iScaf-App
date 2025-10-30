@@ -43,8 +43,8 @@ export default function Member() {
   };
 
   return (
-    <main className="flex flex-col gap-4 row-start-2 items-center p-4">
-      <Card className="w-full p-1 gap-1 shadow-md bg-blue-50">
+    <div className="flex flex-col gap-4 row-start-2 items-center p-4">
+      <Card className="w-full p-1 gap-1 shadow-2xl bg-blue-50 border-primary">
         <CardHeader>
           <div className="w-fit h-10 mx-auto">
             <Image
@@ -56,7 +56,7 @@ export default function Member() {
             />
           </div>
         </CardHeader>
-        <Separator className="my-1" />
+        <Separator className="my-1 bg-primary" />
         <CardContent className="gap-4 grid grid-cols-2 justify-center justify-items-center ">
           <div className="flex flex-col gap-1">
             <p className="text-center font-bold">{member?.FullName}</p>
@@ -65,7 +65,7 @@ export default function Member() {
             <p>{member?.Dept}</p>
           </div>
           {member && profile && (
-            <div className="rounded-2xl border-2 border-primary w-fit h-[150px]">
+            <div className="rounded-2xl border-2 border-primary w-fit min-h-[145px]">
               <Image
                 className="rounded-2xl h-full"
                 alt={member.FullName}
@@ -97,6 +97,6 @@ export default function Member() {
         Đăng xuất
       </Button>
       <InstallButton />
-    </main>
+    </div>
   );
 }

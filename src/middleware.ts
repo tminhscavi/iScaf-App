@@ -1,11 +1,9 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
+import { authRoutes, protectedRoutes } from './constants/route';
 // import { jwtVerify } from 'jose'
 
 // Define protected and public routes
-const protectedRoutes = ['/home'];
-const publicRoutes = ['/login', '/register'];
-const authRoutes = ['/login', '/register'];
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
@@ -17,14 +15,20 @@ export async function middleware(request: NextRequest) {
     (route) => pathname.startsWith(route) || pathname === '/',
   );
 
-
   // Check if current route is auth route (login/register)
   const isAuthRoute = authRoutes.includes(pathname);
+  if (token && isAuthRoute) {
+    const homeUrl = new URL('/', request.url);
+    return NextResponse.redirect(homeUrl);
+  }
 
   // If no token and trying to access protected route
   if (!token && isProtectedRoute) {
     const loginUrl = new URL('/login', request.url);
-    loginUrl.searchParams.set('redirect', pathname);
+    if (!isAuthRoute) {
+      loginUrl.searchParams.set('redirect', pathname);
+    }
+
     return NextResponse.redirect(loginUrl);
   }
 

@@ -1,4 +1,4 @@
-import LoadingThreeDots from '@/components/DotLoading';
+import DotLoading from '@/components/DotLoading';
 import Image from 'next/image';
 
 export default function LoadingContainer() {
@@ -11,7 +11,7 @@ export default function LoadingContainer() {
         height={40}
         priority
       />
-      <LoadingThreeDots />
+      <DotLoading />
     </div>
   );
 }

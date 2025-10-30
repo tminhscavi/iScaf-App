@@ -2,7 +2,7 @@
 
 import { motion, Variants } from 'framer-motion';
 
-function LoadingThreeDots() {
+function DotLoading() {
   const dotVariants: Variants = {
     jump: {
       y: [0, -10, 0],
@@ -39,4 +39,4 @@ function LoadingThreeDots() {
   );
 }
 
-export default LoadingThreeDots;
+export default DotLoading;

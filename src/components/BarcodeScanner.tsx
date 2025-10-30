@@ -222,9 +222,15 @@ export default function BarcodeScanner({
 
         <div className="flex space-x-2 justify-center">
           {!isScanning ? (
-            <Button onClick={startScanning}>{startText}</Button>
+            <Button type="button" onClick={startScanning}>
+              {startText}
+            </Button>
           ) : (
-            <Button variant={'destructive'} onClick={stopScanning}>
+            <Button
+              type="button"
+              variant={'destructive'}
+              onClick={stopScanning}
+            >
               {stopText}
             </Button>
           )}

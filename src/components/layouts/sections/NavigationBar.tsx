@@ -5,7 +5,7 @@ import Link from 'next/link';
 
 export default function NavigationBar() {
   return (
-    <div className="w-full h-[10vh] border-primary bg-white z-50 border-y-2  max-w-[480px] flex">
+    <nav className="w-full h-[10vh] max-h-14 border-primary bg-white z-50 border-y-2 max-w-[480px] flex">
       <div className="grid w-full grid-cols-4 items-center gap-2">
         {MOBILE_NAVIGATION_MENU.map((item) => (
           <Link key={item.path} href={item.path}>
@@ -21,6 +21,6 @@ export default function NavigationBar() {
           </Link>
         ))}
       </div>
-    </div>
+    </nav>
   );
 }

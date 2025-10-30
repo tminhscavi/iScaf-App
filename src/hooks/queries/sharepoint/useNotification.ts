@@ -12,6 +12,7 @@ export const useNotifications = (
     queryKey: ['notifications'],
     queryFn: async (): Promise<TUserNotification[]> =>
       await getNotifications(params?.memberCode),
+    refetchOnWindowFocus: true,
     ...options,
   });
 };

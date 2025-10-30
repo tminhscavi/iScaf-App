@@ -25,12 +25,12 @@ export const MOBILE_NAVIGATION_MENU: {
   },
   {
     label: 'Danh mục',
-    path: '/navigation-menu',
+    path: '/menu',
     icon: <Menu className="h-5 w-5" />,
   },
   {
     label: 'Thông báo',
-    path: '/notification/list',
+    path: '/notifications',
     icon: <Bell className="h-5 w-5" />,
   },
   {
