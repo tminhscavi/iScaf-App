@@ -7,10 +7,14 @@ export const msalConfig = {
       process.env.NODE_ENV === 'production'
         ? process.env.HOST_URL
         : 'http://localhost:3000',
+    navigateToLoginRequestUrl: false, // Important for Next.js
   },
   cache: {
     cacheLocation: 'sessionStorage',
     storeAuthStateInCookie: false,
+  },
+  system: {
+    allowNativeBroker: false, // Disables WAM Broker
   },
 };
 

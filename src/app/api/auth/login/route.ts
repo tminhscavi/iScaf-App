@@ -38,7 +38,6 @@ export async function POST(request: Request) {
     path: '/',
   });
 
-
   return Response.json(
     { message: 'Login successful', token },
     {

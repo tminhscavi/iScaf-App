@@ -65,13 +65,14 @@ export default function Member() {
             <p>{member?.Dept}</p>
           </div>
           {member && profile && (
-            <div className="rounded-2xl border-2 border-primary w-fit min-h-[145px]">
+            <div className="rounded-2xl border-2 border-primary w-fit min-h-[145px] min-w-[110px] object-cover">
               <Image
                 className="rounded-2xl h-full"
                 alt={member.FullName}
                 src={profile.Img}
                 width={100}
                 height={150}
+                overrideSrc="/images/user.png"
               />
             </div>
           )}

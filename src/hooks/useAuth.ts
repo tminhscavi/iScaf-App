@@ -65,7 +65,7 @@ export function useAuth() {
 
       if (!response.error) {
         setToken(response.token);
-        router.push('/');
+        window.location.href = '/';
         return { success: true };
       } else {
         toast.error(response.error);

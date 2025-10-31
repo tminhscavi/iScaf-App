@@ -7,74 +7,53 @@ import { authRoutes, protectedRoutes } from './constants/route';
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
-  // Get the token from cookies
   const token = request.cookies.get('auth-token')?.value;
 
-  // Check if current route is protected
-  const isProtectedRoute = protectedRoutes.some(
-    (route) => pathname.startsWith(route) || pathname === '/',
+  // Define protected routes
+  const isProtectedPath = protectedRoutes.some((path) =>
+    pathname.startsWith(path),
   );
 
-  // Check if current route is auth route (login/register)
-  const isAuthRoute = authRoutes.includes(pathname);
-  if (token && isAuthRoute) {
-    const homeUrl = new URL('/', request.url);
-    return NextResponse.redirect(homeUrl);
-  }
-
-  // If no token and trying to access protected route
-  if (!token && isProtectedRoute) {
+  // If accessing protected route without token, redirect to login
+  if (isProtectedPath && !token) {
     const loginUrl = new URL('/login', request.url);
-    if (!isAuthRoute) {
-      loginUrl.searchParams.set('redirect', pathname);
-    }
-
+    loginUrl.searchParams.set('redirect', pathname);
     return NextResponse.redirect(loginUrl);
   }
 
+  // If token exists, verify it
   if (token) {
     try {
-      // Verify JWT token (replace with your secret)
-      // const secret = new TextEncoder().encode(
-      //   process.env.JWT_SECRET || 'your-secret-key'
-      // )
+      // const secret = new TextEncoder().encode(process.env.JWT_SECRET!);
+      // const { payload } = await jwtVerify(token, secret);
 
-      // const { payload } = await jwtVerify(token, secret)
-
-      // Add user info to request headers (optional)
+      // Add member data to request headers for use in API routes/pages
       const requestHeaders = new Headers(request.headers);
-      // requestHeaders.set('x-user-id', payload.userId as string)
-      // requestHeaders.set('x-user-role', payload.role as string || 'user')
+      // requestHeaders.set('x-member-data', JSON.stringify(payload.member));
 
-      // If authenticated user tries to access auth pages, redirect to dashboard
-      if (isAuthRoute) {
+      // If authenticated user tries to access login page, redirect to dashboard
+      if (authRoutes.includes(pathname)) {
         return NextResponse.redirect(new URL('/', request.url));
       }
 
-      // Continue with modified headers
       return NextResponse.next({
         request: {
           headers: requestHeaders,
         },
       });
     } catch (error) {
-      // Invalid token - clear cookie and redirect to login
-      console.error('Token verification failed:', error);
+      // Invalid token - clear cookie and redirect to login if on protected path
+      console.error('JWT verification failed:', error);
 
-      if (isProtectedRoute) {
-        const response = NextResponse.redirect(new URL('/login', request.url));
-        response.cookies.delete('auth-token');
-        return response;
-      }
+      const response = isProtectedPath
+        ? NextResponse.redirect(new URL('/login', request.url))
+        : NextResponse.next();
 
-      // For non-protected routes, just clear the invalid cookie
-      const response = NextResponse.next();
       response.cookies.delete('auth-token');
       return response;
     }
   }
 
-  // Allow access to public routes
   return NextResponse.next();
 }
 
@@ -83,13 +62,13 @@ export const config = {
   matcher: [
     /*
      * Match all request paths except for the ones starting with:
-     * - api (API routes)
+     * - api/auth (authentication endpoints)
      * - _next/static (static files)
      * - _next/image (image optimization files)
      * - favicon.ico (favicon file)
      * - public folder
      */
-    '/((?!api|_next/static|_next/image|favicon.ico|public).*)',
+    '/((?!api/auth|_next/static|_next/image|favicon.ico|.*\\.png$|.*\\.jpg$|.*\\.jpeg$|.*\\.svg$).*)',
   ],
 };
 

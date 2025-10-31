@@ -56,12 +56,13 @@ export default function Home() {
         return setSPToken(response.accessToken);
       }
 
-      const account = await instance.loginPopup(loginRequest);
-      setCookie('msal-token', account.accessToken, {
+      const res = await instance.ssoSilent(loginRequest);
+
+      setCookie('msal-token', res.accessToken, {
         maxAge: 60 * 60 * 24 * 30,
         path: '/',
       });
-      setSPToken(account.accessToken);
+      setSPToken(res.accessToken);
     } catch (error) {
       console.error('Login failed:', error);
       toast.error('Kết nối SharePoint thất bại');
