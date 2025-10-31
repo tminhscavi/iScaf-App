@@ -19,10 +19,10 @@ export default function useMSAL() {
     try {
       const now = new Date();
       const cookieSPToken = getCookie('msal-token');
-      const decodedCookie = decodeJwt(cookieSPToken as string) as any;
 
-      if (cookieSPToken && decodedCookie.exp * 1000 > now.getTime()) {
-        if (!spToken) {
+      if (cookieSPToken) {
+        const decodedCookie = decodeJwt(cookieSPToken as string) as any;
+        if (!spToken && decodedCookie.exp * 1000 > now.getTime()) {
           setSPToken(cookieSPToken);
         }
         return;
