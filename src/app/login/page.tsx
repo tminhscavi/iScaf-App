@@ -10,6 +10,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { useAuthStore } from '@/store/authStore';
 import { useFactoryStore } from '@/store/factoryStore';
 import { handleParseMultipleSelectOptions } from '@/utils/component/combobox';
+import { on } from 'events';
 import { motion } from 'framer-motion';
 import { debounce } from 'lodash';
 import Image from 'next/image';
@@ -19,7 +20,7 @@ import { toast } from 'sonner';
 export default function LoginPage() {
   const { member, setMember, setCompanyCode } = useAuthStore();
   const { factory, setFactory } = useFactoryStore();
-  const { checkUser, login } = useAuth();
+  const { checkUser, onLogin } = useAuth();
   const { data: factories, isLoading: factoryLoading } = useFactories();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [username, setUsername] = useState('');
@@ -93,11 +94,11 @@ export default function LoginPage() {
     }
   };
 
-  const onLogin = async () => {
+  const onClickLogin = async () => {
     try {
       setIsSubmitting(true);
       if (member) {
-        await login(member, pass);
+        await onLogin(member, pass);
       }
     } catch (e) {
       console.log('onLogin', e);
@@ -161,7 +162,7 @@ export default function LoginPage() {
           />
 
           {factory && (
-            <form onSubmit={onLogin}>
+            <form onSubmit={onClickLogin}>
               <Card className="w-full">
                 {/* <CardHeader>
                 <CardTitle>Đăng Nhập</CardTitle>

@@ -2,13 +2,9 @@
 
 import InstallButton from '@/components/InstallButton';
 import { Button } from '@/components/ui/button';
-import {
-  Card,
-  CardContent,
-  CardFooter,
-  CardHeader,
-} from '@/components/ui/card';
+import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
+import { Skeleton } from '@/components/ui/skeleton';
 import { PROFILE_NAVIGATION_MENU } from '@/constants/navigation';
 import { useMemberProfile } from '@/hooks/queries/member/useProfile';
 import { useAuth } from '@/hooks/useAuth';
@@ -20,7 +16,7 @@ export default function Member() {
   const { logout } = useAuth();
   const { member, companyCode } = useAuthStore();
   const { isLoading, setIsLoading } = useAppStore();
-  const { data: profile } = useMemberProfile(
+  const { data: profile, isLoading: profileLoading } = useMemberProfile(
     {
       memberId: member?.C1006PK || '',
       comp: companyCode || '',
@@ -44,27 +40,30 @@ export default function Member() {
 
   return (
     <div className="flex flex-col gap-4 row-start-2 items-center p-4">
-      <Card className="w-full p-1 gap-1 shadow-2xl bg-blue-50 border-primary">
-        <CardHeader>
-          <div className="w-fit h-10 mx-auto">
-            <Image
-              className="h-full"
-              alt={'Scavi'}
-              src={'/images/logo-scavi.svg'}
-              width={100}
-              height={100}
-            />
-          </div>
-        </CardHeader>
-        <Separator className="my-1 bg-primary" />
-        <CardContent className="gap-4 grid grid-cols-2 justify-center justify-items-center ">
-          <div className="flex flex-col gap-1">
-            <p className="text-center font-bold">{member?.FullName}</p>
-            <p>{member?.EmpCode}</p>
-            <p>{member?.Title}</p>
-            <p>{member?.Dept}</p>
-          </div>
-          {member && profile && (
+      {profileLoading && <Skeleton className="w-[350px] h-[150px]" />}
+      {member && profile && (
+        <Card className="w-full p-1 gap-1 shadow-2xl bg-blue-50 border-primary">
+          <CardHeader>
+            <div className="w-fit h-10 mx-auto">
+              <Image
+                className="h-full"
+                alt={'Scavi'}
+                src={'/images/logo-scavi.svg'}
+                width={100}
+                height={100}
+                priority
+              />
+            </div>
+          </CardHeader>
+          <Separator className="my-1 bg-primary" />
+          <CardContent className="gap-4 grid grid-cols-2 justify-center justify-items-center ">
+            <div className="flex flex-col gap-1">
+              <p className="text-center font-bold">{member?.FullName}</p>
+              <p>{member?.EmpCode}</p>
+              <p>{member?.Title}</p>
+              <p>{member?.Dept}</p>
+            </div>
+
             <div className="rounded-2xl border-2 border-primary w-fit min-h-[145px] min-w-[110px] object-cover">
               <Image
                 className="rounded-2xl h-full"
@@ -73,11 +72,12 @@ export default function Member() {
                 width={100}
                 height={150}
                 overrideSrc="/images/user.png"
+                priority
               />
             </div>
-          )}
-        </CardContent>
-      </Card>
+          </CardContent>
+        </Card>
+      )}
       <div className="w-full">
         {PROFILE_NAVIGATION_MENU.map((item) => (
           <div

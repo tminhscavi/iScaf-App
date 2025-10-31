@@ -1,43 +1,61 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 'use client';
 
+import { MSALPermissionReq } from '@/constants/msalConfig';
+import { useAppStore } from '@/store/appStore';
 import { useMsal } from '@azure/msal-react';
-import * as React from 'react';
+import { getCookie, setCookie } from 'cookies-next/client';
+import { decodeJwt } from 'jose';
+import { usePathname } from 'next/navigation';
+import { useEffect } from 'react';
+import { toast } from 'sonner';
 
-const SHAREPOINT_SCOPES = {
-  scopes: ['Sites.Read.All', 'User.Read'], // Scopes needed for MS Graph / SharePoint
-};
-
-export default function SharePointFetcher() {
+export default function useMSAL() {
+  const pathname = usePathname();
+  const { spToken, setSPToken } = useAppStore();
   const { instance, accounts } = useMsal();
-  const [accessToken, setAccessToken] = React.useState<string | null>(null);
 
-  React.useEffect(() => {
-    // 1. Check if an account is logged in
-    const request = {
-      ...SHAREPOINT_SCOPES,
-      account: accounts[0], // Use the first logged-in account
-    };
+  const authenticateSharePoint = async () => {
+    try {
+      const now = new Date();
+      const cookieSPToken = getCookie('msal-token');
+      const decodedCookie = decodeJwt(cookieSPToken as string) as any;
 
-    if (accounts.length > 0) {
-      // 2. ATTEMPT SILENT TOKEN ACQUISITION
-      instance
-        .acquireTokenSilent(request)
-        .then((response: any) => {
-          setAccessToken(response.accessToken);
-        })
-        .catch((error: any) => {
-          // 3. IF SILENT FAILS, FALLBACK TO INTERACTIVE ACQUISITION
-          if (error) {
-            instance.acquireTokenRedirect(request);
-          } else {
-            console.error('Error acquiring token:', error);
-          }
+      if (cookieSPToken && decodedCookie.exp * 1000 > now.getTime()) {
+        if (!spToken) {
+          setSPToken(cookieSPToken);
+        }
+        return;
+      }
+
+      if (accounts.length > 0) {
+        const response = await instance.acquireTokenSilent({
+          ...MSALPermissionReq,
+          account: accounts[0],
         });
-    }
-  }, [instance, accounts]);
+        setCookie('msal-token', response.accessToken, {
+          maxAge: 60 * 60 * 24 * 30,
+          path: '/',
+        });
+        return setSPToken(response.accessToken);
+      }
 
-  if (accessToken) {
-    console.log('Access Token:', accessToken);
-  }
+      const res = await instance.ssoSilent(MSALPermissionReq);
+
+      setCookie('msal-token', res.accessToken, {
+        maxAge: 60 * 60 * 24 * 30,
+        path: '/',
+      });
+      setSPToken(res.accessToken);
+    } catch (error) {
+      console.error('Login failed:', error);
+      toast.error('Kết nối SharePoint thất bại');
+    }
+  };
+
+  useEffect(() => {
+    setTimeout(() => {
+      authenticateSharePoint();
+    }, 300);
+  }, [pathname]);
 }

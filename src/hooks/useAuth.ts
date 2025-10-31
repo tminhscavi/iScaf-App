@@ -1,5 +1,6 @@
 'use client';
 
+import { getMemberInfo, login, logout } from '@/services/authServices';
 import { useAuthStore } from '@/store/authStore';
 import { TMember } from '@/types/member';
 import { api } from '@/utils/axios';
@@ -19,12 +20,7 @@ export function useAuth() {
 
   const checkUser = async (comp: string, memberId: string) => {
     try {
-      const response = await await api.get(
-        `/eoffice/Eoffice_Get_Member_V2/COMP/${comp}/MEMBER/${memberId}/HR044/0`,
-        {
-          baseURL: '/api',
-        },
-      );
+      const response = await getMemberInfo(comp, memberId);
       return response;
     } catch (error) {
       toast.error('Vui lòng kiểm tra lại MSTV');
@@ -46,7 +42,7 @@ export function useAuth() {
           router.push('/');
           return { success: true };
         } else {
-          await logout();
+          await onLogout();
         }
       }
       return null;
@@ -55,13 +51,9 @@ export function useAuth() {
     }
   };
 
-  const login = async (member: TMember, password: string) => {
+  const onLogin = async (member: TMember, password: string) => {
     try {
-      const response = await api.post(
-        '/auth/login',
-        { member, password },
-        { baseURL: '/api' },
-      );
+      const response = await login(member, password);
 
       if (!response.error) {
         setToken(response.token);
@@ -75,12 +67,12 @@ export function useAuth() {
     }
   };
 
-  const logout = async () => {
-    await api.post('/auth/logout', {}, { baseURL: '/api' });
+  const onLogout = async () => {
+    await logout();
     reset();
     setUser(null);
     router.push('/login');
   };
 
-  return { user, loading, login, logout, checkAuth, checkUser };
+  return { user, loading, onLogin, logout: onLogout, checkAuth, checkUser };
 }

@@ -1,29 +1,19 @@
 'use client';
 
 import AuthenticatedLayout from '@/components/layouts/AuthenticatedLayout';
-import {
-  Card,
-  CardContent,
-  CardFooter,
-  CardHeader,
-} from '@/components/ui/card';
+import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
-import { loginRequest } from '@/constants/msalConfig';
 import { useNotifications } from '@/hooks/queries/sharepoint/useNotification';
 import { useAppStore } from '@/store/appStore';
 import { useAuthStore } from '@/store/authStore';
 import { toDateTimeString } from '@/utils/date';
-import { useMsal } from '@azure/msal-react';
-import { getCookie, setCookie } from 'cookies-next/client';
 import { Bell } from 'lucide-react';
 import Image from 'next/image';
-import { useEffect, useState } from 'react';
-import { toast } from 'sonner';
 
 export default function Home() {
   const { member } = useAuthStore();
-  const { spToken, setSPToken } = useAppStore();
-  const { instance, accounts } = useMsal();
+  const { spToken } = useAppStore();
+
   const { data: notiData } = useNotifications(
     {
       queryKey: ['user-notifications', member?.EmpCode],
@@ -33,47 +23,6 @@ export default function Home() {
       memberCode: member?.EmpCode || '',
     },
   );
-
-  const [loading, setLoading] = useState(false);
-
-  const authenticateSharePoint = async () => {
-    try {
-      const cookieSPToken = getCookie('msal-token');
-
-      if (cookieSPToken) {
-        return setSPToken(cookieSPToken);
-      }
-
-      if (accounts.length > 0) {
-        const response = await instance.acquireTokenSilent({
-          ...loginRequest,
-          account: accounts[0],
-        });
-        setCookie('msal-token', response.accessToken, {
-          maxAge: 60 * 60 * 24 * 30,
-          path: '/',
-        });
-        return setSPToken(response.accessToken);
-      }
-
-      const res = await instance.ssoSilent(loginRequest);
-
-      setCookie('msal-token', res.accessToken, {
-        maxAge: 60 * 60 * 24 * 30,
-        path: '/',
-      });
-      setSPToken(res.accessToken);
-    } catch (error) {
-      console.error('Login failed:', error);
-      toast.error('Kết nối SharePoint thất bại');
-    }
-  };
-
-  useEffect(() => {
-    setTimeout(() => {
-      authenticateSharePoint();
-    }, 300);
-  }, []);
 
   return (
     <AuthenticatedLayout>

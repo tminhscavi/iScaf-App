@@ -13,12 +13,9 @@ export const msalConfig = {
     cacheLocation: 'sessionStorage',
     storeAuthStateInCookie: false,
   },
-  system: {
-    allowNativeBroker: false, // Disables WAM Broker
-  },
 };
 
-export const loginRequest = {
+export const MSALPermissionReq = {
   scopes: [' User.Read', 'Sites.Manage.All'],
 };
 
