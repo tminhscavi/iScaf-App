@@ -53,26 +53,28 @@ export default function useMSAL() {
     }
   };
 
-  useEffect(() => {
-    instance.handleRedirectPromise().then((response) => {
-      if (response) {
-        // ✅ We're back from Microsoft login
-        instance.setActiveAccount(response.account);
-        console.log('Login complete:', response.account);
-      } else {
-        // Not a redirect — maybe user already has a cached account
-        const account = instance.getAllAccounts()[0];
-        if (account) instance.setActiveAccount(account);
-      }
-    });
-    setIsInitMSAL(true);
-  }, []);
+  // const initMSALRedirect = async () => {
+  //   await instance.handleRedirectPromise().then((response) => {
+  //     if (response) {
+  //       // ✅ We're back from Microsoft login
+  //       instance.setActiveAccount(response.account);
+  //       console.log('Login complete:', response.account);
+  //     } else {
+  //       // Not a redirect — maybe user already has a cached account
+  //       const account = instance.getAllAccounts()[0];
+  //       if (account) instance.setActiveAccount(account);
+  //     }
+  //   });
+  //   setIsInitMSAL(true);
+  // };
+
+  // useEffect(() => {
+  //   initMSALRedirect();
+  // }, []);
 
   useEffect(() => {
-    if (isInitMSAL) {
-      setTimeout(() => {
-        authenticateSharePoint();
-      }, 300);
-    }
+    setTimeout(() => {
+      authenticateSharePoint();
+    }, 300);
   }, [pathname, isInitMSAL]);
 }
