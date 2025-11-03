@@ -58,7 +58,9 @@ export function useAuth() {
       if (!response.error) {
         setToken(response.token);
         // window.location.href = '/';
-        router.refresh();
+        setTimeout(() => {
+          router.push('/');
+        }, 300);
         return { success: true };
       } else {
         toast.error(response.error);
