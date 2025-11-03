@@ -17,7 +17,7 @@ export default function Home() {
   const { data: notiData } = useNotifications(
     {
       queryKey: ['user-notifications', member?.EmpCode],
-      enabled: !!spToken && !!member,
+      enabled: !!spToken && !!member?.EmpCode,
     },
     {
       memberCode: member?.EmpCode || '',

@@ -23,30 +23,27 @@ export default function useMSAL() {
       if (cookieSPToken) {
         const decodedCookie = decodeJwt(cookieSPToken as string) as any;
         if (!spToken && decodedCookie.exp * 1000 > now.getTime()) {
-          setSPToken(cookieSPToken);
+          return setSPToken(cookieSPToken);
         }
-        return;
       }
 
       if (accounts.length > 0) {
-        const response = await instance.acquireTokenSilent({
-          ...MSALPermissionReq,
-          account: accounts[0],
-        });
-        setCookie('msal-token', response.accessToken, {
+        const res = await instance.ssoSilent(MSALPermissionReq);
+        setCookie('msal-token', res.accessToken, {
           maxAge: 60 * 60 * 24 * 30,
           path: '/',
         });
-        return setSPToken(response.accessToken);
+        return setSPToken(res.accessToken);
       }
 
-      const res = await instance.ssoSilent(MSALPermissionReq);
-
-      setCookie('msal-token', res.accessToken, {
-        maxAge: 60 * 60 * 24 * 30,
-        path: '/',
-      });
-      setSPToken(res.accessToken);
+      await instance.loginRedirect(MSALPermissionReq);
+      // if (res) {
+      //   setCookie('msal-token', res.accessToken, {
+      //     maxAge: 60 * 60 * 24 * 30,
+      //     path: '/',
+      //   });
+      //   setSPToken(res.accessToken);
+      // }
     } catch (error) {
       console.error('Login failed:', error);
       toast.error('Kết nối SharePoint thất bại');
