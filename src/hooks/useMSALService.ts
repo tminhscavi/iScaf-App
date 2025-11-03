@@ -26,6 +26,7 @@ export default function useMSAL() {
           return setSPToken(cookieSPToken);
         }
       }
+      console.log('accounts', accounts);
 
       if (accounts.length > 0) {
         const res = await instance.ssoSilent(MSALPermissionReq);
