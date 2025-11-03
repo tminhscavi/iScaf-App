@@ -12,7 +12,7 @@ import { toast } from 'sonner';
 
 export default function useMSAL() {
   const pathname = usePathname();
-  const { spToken, setSPToken } = useAppStore();
+  const { spToken, setSPToken, isInitMSAL, setIsInitMSAL } = useAppStore();
   const { instance, accounts } = useMsal();
 
   const authenticateSharePoint = async () => {
@@ -65,11 +65,14 @@ export default function useMSAL() {
         if (account) instance.setActiveAccount(account);
       }
     });
+    setIsInitMSAL(true);
   }, []);
 
   useEffect(() => {
-    setTimeout(() => {
-      authenticateSharePoint();
-    }, 300);
-  }, [pathname]);
+    if (isInitMSAL) {
+      setTimeout(() => {
+        authenticateSharePoint();
+      }, 300);
+    }
+  }, [pathname, isInitMSAL]);
 }
