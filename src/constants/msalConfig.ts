@@ -3,10 +3,10 @@ export const msalConfig = {
     clientId: '47f209b0-c357-45c4-8eb7-62a00350dff4',
     authority:
       'https://login.microsoftonline.com/44c4330c-b963-43ef-a0bc-a03a075da74c',
-    redirectUri: window.location.origin,
-    // process.env.NODE_ENV === 'production'
-    //   ? process.env.HOST_URL
-    //   : 'http://localhost:3000',
+    redirectUri:
+      process.env.NODE_ENV === 'production'
+        ? 'https://iscaf.vercel.app' //process.env.HOST_URL
+        : 'http://localhost:3000',
   },
   cache: {
     cacheLocation: 'sessionStorage',
