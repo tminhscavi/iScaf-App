@@ -36,6 +36,7 @@ export default function useMSAL() {
         });
         return setSPToken(res.accessToken);
       }
+      console.log('loginRedirect');
 
       await instance.loginRedirect(MSALPermissionReq);
       // if (res) {
