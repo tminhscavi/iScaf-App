@@ -39,6 +39,17 @@ export default function useMSAL() {
       console.log('loginRedirect');
 
       await instance.loginRedirect(MSALPermissionReq);
+      instance.handleRedirectPromise().then((response) => {
+        if (response) {
+          // ✅ We're back from Microsoft login
+          instance.setActiveAccount(response.account);
+          console.log('Login complete:', response.account);
+        } else {
+          // Not a redirect — maybe user already has a cached account
+          const account = instance.getAllAccounts()[0];
+          if (account) instance.setActiveAccount(account);
+        }
+      });
       // if (res) {
       //   setCookie('msal-token', res.accessToken, {
       //     maxAge: 60 * 60 * 24 * 30,
