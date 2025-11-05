@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 'use client';
 
-import { MSALPermissionReq } from '@/constants/msalConfig';
+import { DEFAULT_ACCOUNT, MSALPermissionReq } from '@/constants/msalConfig';
 import { useAppStore } from '@/store/appStore';
 import { useMsal } from '@azure/msal-react';
 import { getCookie, setCookie } from 'cookies-next/client';
@@ -12,11 +12,28 @@ import { toast } from 'sonner';
 
 export default function useMSAL() {
   const pathname = usePathname();
-  const { spToken, setSPToken, isInitMSAL, setIsInitMSAL } = useAppStore();
-  const { instance, accounts } = useMsal();
+  const { spToken, setSPToken } = useAppStore();
+  const { instance, accounts, inProgress } = useMsal();
 
+  const loginSharePoint = async () => {
+    try {
+ 
+      if (accounts.length > 0) return;
+      //  const res=  await instance.loginRedirect(MSALPermissionReq);
+      //  instance.setActiveAccount(DEFAULT_ACCOUNT);
+
+      
+    } catch (error) {
+      console.error('Login failed:', error);
+      toast.error('Xác thực SharePoint thất bại');
+    }
+  };
   const authenticateSharePoint = async () => {
     try {
+      console.log('inProgress',inProgress);
+      
+      if (inProgress !== 'none') return;
+
       const now = new Date();
       const cookieSPToken = getCookie('msal-token');
 
@@ -26,7 +43,6 @@ export default function useMSAL() {
           return setSPToken(cookieSPToken);
         }
       }
-      console.log('accounts', accounts);
 
       if (accounts.length > 0) {
         const res = await instance.ssoSilent(MSALPermissionReq);
@@ -36,17 +52,6 @@ export default function useMSAL() {
         });
         return setSPToken(res.accessToken);
       }
-      console.log('loginRedirect');
-
-      await instance.loginRedirect(MSALPermissionReq);
-
-      // if (res) {
-      //   setCookie('msal-token', res.accessToken, {
-      //     maxAge: 60 * 60 * 24 * 30,
-      //     path: '/',
-      //   });
-      //   setSPToken(res.accessToken);
-      // }
     } catch (error) {
       console.error('Login failed:', error);
       toast.error('Kết nối SharePoint thất bại');
@@ -74,7 +79,15 @@ export default function useMSAL() {
 
   useEffect(() => {
     setTimeout(() => {
+      loginSharePoint();
+    }, 1000);
+  }, []);
+
+  useEffect(() => {
+    console.log('accounts', accounts);
+
+    setTimeout(() => {
       authenticateSharePoint();
     }, 300);
-  }, [pathname, isInitMSAL]);
+  }, [accounts, pathname]);
 }

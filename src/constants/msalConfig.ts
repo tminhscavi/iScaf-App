@@ -18,6 +18,8 @@ export const MSALPermissionReq = {
   scopes: [' User.Read', 'Sites.Manage.All'],
 };
 
+export const DEFAULT_ACCOUNT = {}
+
 export const SHAREPOINT_SITE_ID =
   'scavigroup.sharepoint.com,11e1b152-a183-43f0-bc6e-927f1d96a61f,1baeb911-b152-4cf6-b567-05ca4a634eb9';
 

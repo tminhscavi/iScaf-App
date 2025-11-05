@@ -4,7 +4,7 @@
 import useMSAL from '@/hooks/useMSALService';
 
 export default function ProviderLayout({ children }: { children: any }) {
-  useMSAL();
+  // useMSAL();
 
   return <>{children}</>;
 }
