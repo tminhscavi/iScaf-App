@@ -1,3 +1,4 @@
+import { protectedRoutes } from '@/constants/route';
 import type { NextConfig } from 'next';
 import PWA from 'next-pwa';
 
@@ -33,6 +34,18 @@ const withPWA = PWA({
 
   // Pre-cache when navigating via <Link>
   cacheOnFrontEndNav: true,
+
+  runtimeCaching: [
+    {
+      urlPattern: ({ url }) => {
+        return (
+          protectedRoutes.some((route) => url.pathname.startsWith(route)) ||
+          url.pathname === '/'
+        );
+      },
+      handler: 'NetworkOnly', // Always check authentication
+    },
+  ],
 });
 
 const nextConfig: NextConfig = {
