@@ -36,11 +36,40 @@ const withPWA = PWA({
   cacheOnFrontEndNav: true,
 
   runtimeCaching: [
+    // Static resources can be cached
     {
-      urlPattern: ({ url }) => {
-        return protectedRoutes.some((route) => url.pathname.startsWith('/'));
+      urlPattern: /\/_next\/static\/.*/i,
+      handler: 'CacheFirst',
+    },
+    {
+      urlPattern: /\.(?:png|jpg|jpeg|svg|gif|webp|woff2?)$/i,
+      handler: 'CacheFirst',
+    },
+
+    // ALL pages/routes go through middleware (no caching)
+    {
+      urlPattern: ({ url, request }) => {
+        const isSameOrigin = url.origin === self.location.origin;
+        const isNavigationRequest = request.mode === 'navigate';
+        const isNotStaticAsset = !/\.(js|css|png|jpg|svg|woff2?)$/i.test(
+          url.pathname,
+        );
+        const isNotNextStatic = !url.pathname.startsWith('/_next/static');
+
+        return (
+          isSameOrigin &&
+          isNavigationRequest &&
+          isNotStaticAsset &&
+          isNotNextStatic
+        );
       },
-      handler: 'NetworkOnly', // Always check authentication
+      handler: 'NetworkOnly',
+    },
+
+    // API routes
+    {
+      urlPattern: /\/api\/.*/i,
+      handler: 'NetworkOnly',
     },
   ],
 });
