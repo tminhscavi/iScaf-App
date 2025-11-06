@@ -12,7 +12,7 @@ export default function AuthenticatedLayoutWithHeader({
 }: {
   children: any;
 }) {
-  const { isAuthenticated } = useAuthStore();
+  const { member } = useAuthStore();
   const pathname = usePathname();
   const navigate = useRouter();
 
@@ -20,7 +20,7 @@ export default function AuthenticatedLayoutWithHeader({
     navigate.back();
   };
 
-  if (!isAuthenticated) {
+  if (!member) {
     return children;
   }
 
