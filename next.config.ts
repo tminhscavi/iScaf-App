@@ -1,4 +1,3 @@
-import { protectedRoutes } from '@/constants/route';
 import type { NextConfig } from 'next';
 import PWA from 'next-pwa';
 
@@ -34,44 +33,6 @@ const withPWA = PWA({
 
   // Pre-cache when navigating via <Link>
   cacheOnFrontEndNav: true,
-
-  runtimeCaching: [
-    // Static resources can be cached
-    {
-      urlPattern: /\/_next\/static\/.*/i,
-      handler: 'CacheFirst',
-    },
-    {
-      urlPattern: /\.(?:png|jpg|jpeg|svg|gif|webp|woff2?)$/i,
-      handler: 'CacheFirst',
-    },
-
-    // ALL pages/routes go through middleware (no caching)
-    {
-      urlPattern: ({ url, request }) => {
-        const isSameOrigin = url.origin === self.location.origin;
-        const isNavigationRequest = request.mode === 'navigate';
-        const isNotStaticAsset = !/\.(js|css|png|jpg|svg|woff2?)$/i.test(
-          url.pathname,
-        );
-        const isNotNextStatic = !url.pathname.startsWith('/_next/static');
-
-        return (
-          isSameOrigin &&
-          isNavigationRequest &&
-          isNotStaticAsset &&
-          isNotNextStatic
-        );
-      },
-      handler: 'NetworkOnly',
-    },
-
-    // API routes
-    {
-      urlPattern: /\/api\/.*/i,
-      handler: 'NetworkOnly',
-    },
-  ],
 });
 
 const nextConfig: NextConfig = {
