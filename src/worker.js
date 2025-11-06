@@ -7,7 +7,8 @@ import {
 } from 'workbox-precaching';
 import { registerRoute } from 'workbox-routing';
 import {
-  CacheFirst
+  CacheFirst,
+  NetworkOnly
 } from 'workbox-strategies';
 
 const CACHE_VERSION = '1.0.1';

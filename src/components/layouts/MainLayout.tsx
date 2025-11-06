@@ -11,7 +11,7 @@ export default function MainLayout({ children }: { children: any }) {
   const msalInstance = new PublicClientApplication(msalConfig);
 
   return (
-    <main className="max-w-[475px] flex flex-col min-h-screen max-h-screen overflow-hidden mx-auto">
+    <main className="max-w-[475px] flex flex-col min-h-[svh] max-h-[svh] overflow-hidden mx-auto">
       <Toaster position="top-center" />
       <InitialClient />
       <MsalProvider instance={msalInstance}>{children}</MsalProvider>
