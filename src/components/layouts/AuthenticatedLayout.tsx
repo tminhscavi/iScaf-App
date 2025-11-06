@@ -6,10 +6,10 @@ import NavigationBar from './sections/NavigationBar';
 
 export default function AuthenticatedLayout({ children }: { children: any }) {
   // const { checkUser, login } = useAuth();
-  const { isAuthenticated } = useAuthStore();
+  const { member } = useAuthStore();
 
 
-  if (!isAuthenticated) {
+  if (!member) {
     return children;
   }
 
