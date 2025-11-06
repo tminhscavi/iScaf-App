@@ -38,10 +38,7 @@ const withPWA = PWA({
   runtimeCaching: [
     {
       urlPattern: ({ url }) => {
-        return (
-          protectedRoutes.some((route) => url.pathname.startsWith(route)) ||
-          url.pathname === '/'
-        );
+        return protectedRoutes.some((route) => url.pathname.startsWith('/'));
       },
       handler: 'NetworkOnly', // Always check authentication
     },
